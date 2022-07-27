@@ -9,4 +9,4 @@ Google cloud functions for friendly bet app
 RAPID_API_KEY='<THE AUTHENTICATION CODE YOU CREATED IN THE REPID API>'
 ```
 
-Changes are allowed only by approved PRs
+Please open PRs to apply changes :kissing_heart:
