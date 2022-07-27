@@ -11,4 +11,4 @@ RAPID_API_KEY='<THE AUTHENTICATION CODE YOU CREATED IN THE REPID API>'
 
 ### Tips
 - Please open PRs to apply changes :kissing_heart:
-- Create an [Issue](https://github.com/mob1st/bet-functions/issues) with your github user to require access to Firebase used by us
+- To require access to the Firebase projecrt and the Googke Cloud Functions used by us, create an [Issue](https://github.com/mob1st/bet-functions/issues) with your github user and the label `good first issue` :heart:
