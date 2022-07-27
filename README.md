@@ -3,10 +3,10 @@ Google Cloud Functions for friendly bet app
 
 ### To run this project
 - Follow the [Google Cloud Functions](https://cloud.google.com/functions) documentation to setting up your machine 
-- Generate an authentication token on [Footbal-API by RapidApi](https://rapidapi.com/api-sports/api/api-football)
+- Generate an authentication token through [API-Footbal by RapidApi](https://rapidapi.com/api-sports/api/api-football)
 - Creates a local `.env` file in the root path of the project containing:
 ```.env
-RAPID_API_KEY='<THE AUTHENTICATION CODE YOU CREATED IN THE REPID API>'
+RAPID_API_KEY='<THE AUTHENTICATION TOKEN YOU CREATED IN THE RAPID API>'
 ```
 
 ### Tips
