@@ -1,5 +1,5 @@
 # bet-functions
-Google cloud functions for friendly bet app
+Google Cloud Functions for friendly bet app
 
 ### To run this project
 - Follow the [Google Cloud Functions](https://cloud.google.com/functions) documentation to setting up your machine 
