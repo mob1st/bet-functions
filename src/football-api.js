@@ -13,7 +13,7 @@ footbalApi.defaults.headers.common['X-RapidAPI-Host'] = 'api-football-v1.p.rapid
  * 
  * You need to check the API response to see the available league ids. 
  * The id for the World Cup is 1
- * @param {String} league the id of the league on Footbal API. 
+ * @param {String} league the id of the league on Football API. 
  * @param {String} season the year of the season
  * @returns json response contaning the data 
  */
@@ -32,7 +32,7 @@ async function fetchLeague(league, season) {
  * 
  * You need to check the API response to see the available league ids. 
  * The id for the World Cup is 1
- * @param {String} league the id of the league on Footbal API. 
+ * @param {String} league the id of the league on Football API. 
  * @param {String} season the year of the season
  * @returns json response contaning the data 
  */
@@ -47,7 +47,7 @@ async function fetchTeams(league, season) {
 }
 
 function _logResponse(path, response) {
-    console.log(`response for ${path} --- status: ${response.status} --- data: ${JSON.stringify(response.data.league)}`);
+    console.log(`football-api._logResponse: path ${path} --- status: ${response.status} --- data: ${JSON.stringify(response.data)}`);
 }
 
 module.exports = {

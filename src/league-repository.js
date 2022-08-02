@@ -1,4 +1,4 @@
-const { Localized, from4Y2M2DtoDate } = require('./common-data');
+const { Localized, shortIsoToDate } = require('./common-data');
 const api = require('./football-api');
 const db = require('./football-db');
 
@@ -16,7 +16,7 @@ async function populateWorldCup() {
 
     const data = _fromApiToDb(
         'world_cup_2022', 
-        'api_league_world_cup_2022_name', 
+        'api_footbal_league_world_cup_2022_name',
         leagueResponse,
         teamsResponse
     );    
@@ -32,8 +32,8 @@ async function populateWorldCup() {
  * @returns the data object that will be persisted by the database
  */
 function _fromApiToDb(id, nameResId, leagueResponse, teamsResponse) {
-    console.log('league-repository._fromApiToDb: parsing leagues '+ JSON.stringify(leagueResponse));
-    console.log('league-repository._fromApiToDb: parsing teams '+ JSON.stringify(teamsResponse));
+    console.log('league-repository._fromApiToDb: handle leagues ' + JSON.stringify(leagueResponse));
+    console.log('league-repository._fromApiToDb: handle teams ' + JSON.stringify(teamsResponse));
     const leagueData = leagueResponse.response[0];
     const teams = teamsResponse.response;
     return {
@@ -52,12 +52,12 @@ function _fromApiToDb(id, nameResId, leagueResponse, teamsResponse) {
  * @returns the team handled by the database
  */
 function _teamData(team) {    
-    console.log('league-repository._teamData: parsing team '+ JSON.stringify(team));
+    console.log('league-repository._teamData: parsing team ' + JSON.stringify(team));
     const code = team.code.toLowerCase();
     return {
         id: `team_${code}`,
         apiId: team.id,        
-        name: new Localized(team.name, `api_team_${code}_name`),
+        name: new Localized(team.name, `api_footbal_team_${code}_name`),
     }
 }
 
