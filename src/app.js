@@ -5,9 +5,9 @@ functions.http('bet-football', async (_req, res) => {
     try {
         const data = await populateLeagueUseCase();
         console.log('finish with success', JSON.stringify(data));
-        return res.status(200).send(data);
+        return res.status(200).send(data).end();
     } catch (e) {        
         console.error('some error happens on popuplate data', e);
-        return res.status(500).send(JSON.stringify(e, Object.getOwnPropertyNames(e)));
+        return res.status(500).send(JSON.stringify(e, Object.getOwnPropertyNames(e))).end();
     }
 });
