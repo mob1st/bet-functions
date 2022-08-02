@@ -21,7 +21,7 @@ async function fetchLeague(league, season) {
     const options = {    
         params: { id: league, season: season },
     };
-    console.log('football-api.fetchLeague: ' + JSON.stringify(options));
+    console.log('football-api.fetchLeague', JSON.stringify(options));
     const response = await footbalApi.get('/leagues', options);    
     _logResponse('league', response);
     return response.data;
@@ -40,14 +40,14 @@ async function fetchTeams(league, season) {
     const options = {
         params: { league: league, season: season }
     };    
-    console.log('football-api.fetchTeams: ' + JSON.stringify(options));
+    console.log('football-api.fetchTeams', JSON.stringify(options));
     const response = await footbalApi.get('/teams', options);    
     _logResponse('teams', response);
     return response.data;
 }
 
 function _logResponse(path, response) {
-    console.log(`football-api._logResponse: path ${path} --- status: ${response.status} --- data: ${JSON.stringify(response.data)}`);
+    console.log('football-api._logResponse', path, response.status, JSON.stringify(response.data));
 }
 
 module.exports = {

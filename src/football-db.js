@@ -9,16 +9,10 @@ const TEAM_COLLECTION = 'team';
  * @param {Object} leagueData 
  */
 async function set(leagueData) {
-	console.log(`football-db.set: persisting league data: ${JSON.stringify(leagueData)}`);
+	console.log('football-db.set: persisting league data', JSON.stringify(leagueData));
 	const leagueDocRef = firestore
 		.collection(FOOTBALL)
 		.doc(leagueData.id);
-	// await leagueDocRef.set({
-	// 	apiId: leagueData.apiId,
-	// 	name: leagueData.name.toJSON(),
-	// 	start: Timestamp.fromDate(leagueData.start),
-	// 	end: Timestamp.fromDate(leagueData.end),
-	// });
 	await _populateLeague(leagueDocRef, leagueData);
 	await _populateTeams(leagueDocRef, leagueData.teams);
 	return leagueData;
@@ -31,7 +25,7 @@ async function set(leagueData) {
  * @returns {Promise} result of set
  */
 function _populateLeague(leagueDocRef, leagueData) {
-	console.log(`football-db._populateLeague: persisting league data: ${JSON.stringify(leagueData)}`);
+	console.log('football-db._populateLeague: persisting league data', JSON.stringify(leagueData));
 	return leagueDocRef.set({
 		apiId: leagueData.apiId,
 		name: leagueData.name.toJSON(),
@@ -47,10 +41,10 @@ function _populateLeague(leagueDocRef, leagueData) {
  * @returns {Promise} result of set
  */
 function _populateTeams(leagueRef, teams) {
-	console.log('footbal-db._populateTeams: ' + JSON.stringify(teams));
+	console.log('footbal-db._populateTeams', JSON.stringify(teams));
 	const batch = firestore.batch();
 	teams.map(function (team) {
-		console.log('footbal-db._populateTeams.$map: ' + JSON.stringify(team));
+		console.log('footbal-db._populateTeams.$map', JSON.stringify(team));
 		const teamRef = leagueRef.collection(TEAM_COLLECTION).doc(team.id);
 		batch.set(teamRef, {
 			apiId: team.apiId,

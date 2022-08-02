@@ -32,8 +32,8 @@ async function populateWorldCup() {
  * @returns the data object that will be persisted by the database
  */
 function _fromApiToDb(id, nameResId, leagueResponse, teamsResponse) {
-    console.log('league-repository._fromApiToDb: handle leagues ' + JSON.stringify(leagueResponse));
-    console.log('league-repository._fromApiToDb: handle teams ' + JSON.stringify(teamsResponse));
+    console.log('league-repository._fromApiToDb: handle leagues', JSON.stringify(leagueResponse));
+    console.log('league-repository._fromApiToDb: handle teams',  JSON.stringify(teamsResponse));
     const leagueData = leagueResponse.response[0];
     const teams = teamsResponse.response;
     return {
@@ -52,7 +52,7 @@ function _fromApiToDb(id, nameResId, leagueResponse, teamsResponse) {
  * @returns the team handled by the database
  */
 function _teamData(team) {    
-    console.log('league-repository._teamData: parsing team ' + JSON.stringify(team));
+    console.log('league-repository._teamData: parsing team', JSON.stringify(team));
     const code = team.code.toLowerCase();
     return {
         id: `team_${code}`,

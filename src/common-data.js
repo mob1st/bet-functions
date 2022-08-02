@@ -26,7 +26,7 @@ class Localized {
  * @param {String} strDate the string date to be formatted 
  */
 function shortIsoToDate(strDate) {
-    const splitDate = strDate.split('-');    
+    const splitDate = strDate.split('-');
     return new Date(splitDate[0], splitDate[1] - 1, splitDate[2]);
 }
 
