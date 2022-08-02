@@ -6,6 +6,6 @@ functions.http('bet-football', async (_req, res) => {
         const data = await populateLeagueUseCase();
         return res.status(200).send(data);
     } catch (e) {
-        return res.status(500).send({ error: e });
+        return res.status(500).send({failure: e});
     }
 });

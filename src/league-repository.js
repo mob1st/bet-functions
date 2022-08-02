@@ -1,4 +1,4 @@
-const { Localized } = require('./common-data');
+const { Localized, from4Y2M2DtoDate } = require('./common-data');
 const api = require('./football-api');
 const db = require('./football-db');
 
@@ -8,17 +8,18 @@ const db = require('./football-db');
  * @author Pablo Baldez
  */
 async function populateWorldCup() {
-    const responses = await Promise.all([
+    console.log('league-repository.populateWorldCup: fetching league and teams from API');    
+    const [leagueResponse, teamsResponse] = await Promise.all([
         api.fetchLeague('1', '2022'),
         api.fetchTeams('1', '2022'),
     ]);
-    
+
     const data = _fromApiToDb(
-        'world-cup-2022', 
-        'api_league_world_cup_name', 
-        responses[0],
-        responses[1]
-    );
+        'world_cup_2022', 
+        'api_league_world_cup_2022_name', 
+        leagueResponse,
+        teamsResponse
+    );    
     return await db.set(data);
 }
 
@@ -26,33 +27,36 @@ async function populateWorldCup() {
  * Maps the response from Football API to our data model that will be used by the clients
  * @param {String} id the id of the data. should be some predefined value based on the content loaded
  * @param {String} nameResId the localized name of the league
- * @param {any} leagueResponse the response from the API respective to the league
- * @param {any} teamsResponse the response from the API respective to the teams of the league
+ * @param {Object} leagueResponse the response from the API respective to the league
+ * @param {Object} teamsResponse the response from the API respective to the teams of the league
  * @returns the data object that will be persisted by the database
  */
 function _fromApiToDb(id, nameResId, leagueResponse, teamsResponse) {
-    const league = leagueResponse.response[0];
+    console.log('league-repository._fromApiToDb: parsing leagues '+ JSON.stringify(leagueResponse));
+    console.log('league-repository._fromApiToDb: parsing teams '+ JSON.stringify(teamsResponse));
+    const leagueData = leagueResponse.response[0];
     const teams = teamsResponse.response;
     return {
         id: id,
-        apiId: league.league.id,
-        name: new Localized(league.league.name, nameResId),
-        start: Date(league.seasons[0].start),
-        end: Date(league.seasons[0].end),
-        teams: teams.map((team) => _teamData(team)),
+        apiId: leagueData.league.id,
+        name: new Localized(leagueData.league.name, nameResId),
+        start: shortIsoToDate(leagueData.seasons[0].start),
+        end: shortIsoToDate(leagueData.seasons[0].end),
+        teams: teams.map((teamData) => _teamData(teamData.team)),
     };
 }
 
 /**
  * converts the given team from the API to the structure we will persist on the databa
- * @param {any} team provided by the API
+ * @param {Object} team provided by the API
  * @returns the team handled by the database
  */
-function _teamData(team) {
+function _teamData(team) {    
+    console.log('league-repository._teamData: parsing team '+ JSON.stringify(team));
     const code = team.code.toLowerCase();
     return {
         id: `team_${code}`,
-        apiId: team.id,
+        apiId: team.id,        
         name: new Localized(team.name, `api_team_${code}_name`),
     }
 }

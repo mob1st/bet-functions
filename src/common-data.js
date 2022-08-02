@@ -12,8 +12,25 @@ class Localized {
         this.value = value;
         this.resId = resId;
     };
+
+    toJSON() {
+        return {
+            value: this.value,
+            resId: this.resId,
+        }
+    }
+}
+
+/**
+ * Converts the given string date in the format YYYY-mm-dd to a Date instance
+ * @param {String} strDate the string date to be formatted 
+ */
+function shortIsoToDate(strDate) {
+    const [year, month, day] = strDate.split('-');
+    return Date(year, month-1, day);
 }
 
 module.exports = {
     Localized,
+    shortIsoToDate,
 }

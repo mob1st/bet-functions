@@ -19,9 +19,10 @@ footbalApi.defaults.headers.common['X-RapidAPI-Host'] = 'api-football-v1.p.rapid
  */
 async function fetchLeague(league, season) {
     const options = {    
-        params: { league: league, season: season },
+        params: { id: league, season: season },
     };
-    const response = await axios.get('/leagues', options);    
+    console.log('football-api.fetchLeague: ' + JSON.stringify(options));
+    const response = await footbalApi.get('/leagues', options);    
     _logResponse('league', response);
     return response.data;
 }
@@ -38,14 +39,15 @@ async function fetchLeague(league, season) {
 async function fetchTeams(league, season) {
     const options = {
         params: { league: league, season: season }
-    };
-    const response = await axios.get('/teams', options);    
+    };    
+    console.log('football-api.fetchTeams: ' + JSON.stringify(options));
+    const response = await footbalApi.get('/teams', options);    
     _logResponse('teams', response);
     return response.data;
 }
 
 function _logResponse(path, response) {
-    console.log(`response for ${path} --- status: ${response.status} --- data: ${response.data}`);
+    console.log(`response for ${path} --- status: ${response.status} --- data: ${JSON.stringify(response.data.league)}`);
 }
 
 module.exports = {
