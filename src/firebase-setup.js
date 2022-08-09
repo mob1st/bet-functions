@@ -1,22 +1,28 @@
 
-const GOOGLE_CLOUD_PROJECT = process.env['GOOGLE_CLOUD_PROJECT'];
-const CLOUD_BUCKET = GOOGLE_CLOUD_PROJECT + '_bucket';
 
 const { initializeApp, applicationDefault } = require("firebase-admin/app");
 const { getFirestore, Timestamp, DocumentReference } = require("firebase-admin/firestore");
 const { getStorage } = require('firebase-admin/storage');
+const STORAGE_BUCKET = 'sinuous-tuner-357509.appspot.com'
+const PUBLIC_STORAGE_URL = `https://storage.googleapis.com/${STORAGE_BUCKET}`
 
 const firebaseApp = initializeApp({
     credential: applicationDefault(),
+    storageBucket: STORAGE_BUCKET
 });
-
 const firestore = getFirestore();
-const bucket = getStorage().bucket;
+const storage = getStorage();
 
 module.exports = {
+    // instances
     firebaseApp,
     firestore,
-    bucket,
+    storage,
+
+    // types
     Timestamp,
-    DocumentReference
+    DocumentReference,    
+
+    // constants,
+    PUBLIC_STORAGE_URL
 };
