@@ -1,4 +1,4 @@
-require('dotenv').config()
+require('dotenv').config({ path: './.secrets/.env' })
 const axios = require('axios').default;
 
 const footbalApi = axios.create({
