@@ -1,6 +1,11 @@
-const { firestore, Timestamp, DocumentReference } = require("./firebase-setup");
+const { firestore, Timestamp, DocumentReference, PUBLIC_STORAGE_URL } = require("./firebase-setup");
 const FOOTBALL = 'football_league';
 const TEAM_COLLECTION = 'team';
+
+/**
+ * File folder for teams images
+ */
+const IMAGE_FOLDER = `${FOOTBALL}/${TEAM_COLLECTION}/`;
 
 /**
  * Persists the given league data mapping the properties to something that can be sent to

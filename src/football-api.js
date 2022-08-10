@@ -1,12 +1,11 @@
-require('dotenv').config({ path: './.secrets/.env' })
 const axios = require('axios').default;
 
 const footbalApi = axios.create({
     baseURL: 'https://api-football-v1.p.rapidapi.com/v3'
 });
 
-footbalApi.defaults.headers.common['X-RapidAPI-Key'] = process.env.RAPID_API_KEY
-footbalApi.defaults.headers.common['X-RapidAPI-Host'] = 'api-football-v1.p.rapidapi.com'
+footbalApi.defaults.headers.common['X-RapidAPI-Key'] = process.env.RAPID_API_KEY;
+footbalApi.defaults.headers.common['X-RapidAPI-Host'] = 'api-football-v1.p.rapidapi.com';
 
 /**
  * Fetches a league based on the given parameters

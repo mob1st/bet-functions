@@ -5,7 +5,7 @@
   "main": "src/app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-     "start": "functions-framework --target=bet-football"
+    "start": "functions-framework --target=bet-football"
   },
   "author": "Pablo Baldez",
   "license": "LGPL-3.0",

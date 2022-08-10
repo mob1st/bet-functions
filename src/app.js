@@ -1,6 +1,7 @@
+require('dotenv').config();
 const functions = require('@google-cloud/functions-framework');
+const { DownloadBatch, Downloadable, save } = require('./download-image');
 const populateLeagueUseCase = require("./populate-leagues-usecase").call;
-const listOfImages = require("./download-image").listOfImages;
 
 functions.http('bet-football', async (_req, res) => {
     try {
@@ -13,9 +14,17 @@ functions.http('bet-football', async (_req, res) => {
     }
 });
 
-functions.http('image-downloader', (_req, res) => {
-    try {
-        listOfImages();
+functions.http('image-downloader', async (_req, res) => {
+    try {        
+        const downloadables = [
+            new Downloadable('https://product-images-qa.qa-getmayd.com/img/banners/production/en-us/fallback/homescreen_top_4.png', 'first.png'),
+            new Downloadable('https://product-images-qa.qa-getmayd.com/img/banners/production/v2/home/EN/en_vomex.png', 'second.png'),
+            new Downloadable('https://product-images-qa.qa-getmayd.com/img/banners/production/de-de/homescreen_top_welcomevoucher.png', 'third.png'),
+            new Downloadable('https://product-images-qa.qa-getmayd.com/img/banners/production/v2/home/DE/de_hexal_kopfschmerzen.png', 'fourth.png')        
+        ];
+        const batch = new DownloadBatch("sample", downloadables);
+        await save(batch);
+        console.log('finish request');
         return res.status(200).send({message: 'finish with success'});
     } catch(e) {
         console.error('some error happens on popuplate league data', e);
