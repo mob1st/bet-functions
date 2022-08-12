@@ -2,6 +2,8 @@ const { Localized, shortIsoToDate } = require('./common-data');
 const api = require('./football-api');
 const db = require('./football-db');
 const { League } = require('./league');
+
+const WORLD_CUP_API_ID = 1
 /**
  * creates a league based on the given id. 
  * 
@@ -15,12 +17,8 @@ async function create(
     league, 
     season
 ) {
-    console.log('league-repository.create: fetching league and teams from API', league, season);
-    if (league === League.WorldCup) {
-        var apiId = 1;
-    } else {
-        throw Error(`League id not supported: ${league}`);
-    }
+    console.log('league-repository.create: fetching league and teams from API', league, season);    
+    const apiId = _getApiId(league);
     const [leagueResponse, teamsResponse] = await Promise.all([
         api.fetchLeague(apiId, season),
         api.fetchTeams(apiId, season),
@@ -33,6 +31,14 @@ async function create(
         teamsResponse
     );    
     return await db.set(data);
+}
+
+function _getApiId(league) {
+    if (league === League.WorldCup) {
+        return WORLD_CUP_API_ID;
+    } else {
+        throw Error(`League id not supported: ${league}`);
+    }
 }
 
 /**
