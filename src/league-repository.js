@@ -1,22 +1,34 @@
 const { Localized, shortIsoToDate } = require('./common-data');
 const api = require('./football-api');
 const db = require('./football-db');
-
+const { League } = require('./league');
 /**
- * populates the world cup league and teams
+ * creates a league based on the given id. 
+ * 
+ * Take a look at league.js to see the supported leageus
+ * @param {Object} the league info to be fetched. see the available constants
+ * @param {Number} 
  * @returns the result operation returned by database
  * @author Pablo Baldez
  */
-async function populateWorldCup() {
-    console.log('league-repository.populateWorldCup: fetching league and teams from API');    
+async function create(
+    league, 
+    season
+) {
+    console.log('league-repository.create: fetching league and teams from API', league, season);
+    if (league === League.WorldCup) {
+        var apiId = 1;
+    } else {
+        throw Error(`League id not supported: ${league}`);
+    }
     const [leagueResponse, teamsResponse] = await Promise.all([
-        api.fetchLeague('1', '2022'),
-        api.fetchTeams('1', '2022'),
+        api.fetchLeague(apiId, season),
+        api.fetchTeams(apiId, season),
     ]);
-
+    const dbId = `${league}_${season}`;
     const data = _fromApiToDb(
-        'world_cup_2022', 
-        'api_footbal_league_world_cup_2022_name',
+        dbId, 
+        `api_footbal_league_${dbId}_name`,
         leagueResponse,
         teamsResponse
     );    
@@ -56,11 +68,13 @@ function _teamData(team) {
     const code = team.code.toLowerCase();
     return {
         id: `team_${code}`,
-        apiId: team.id,        
+        apiId: team.id,
+        national: team.national,   
         name: new Localized(team.name, `api_footbal_team_${code}_name`),
+        apiImage: team.logo
     }
 }
 
 module.exports = {
-    populateWorldCup
+    create    
 }

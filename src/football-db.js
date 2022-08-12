@@ -54,6 +54,7 @@ function _populateTeams(leagueRef, teams) {
 		batch.set(teamRef, {
 			apiId: team.apiId,
 			name: team.name.toJSON(),
+			national: team.national
 		});
 	});	
 	console.log('footbal-db._populateTeams: batch.commit');
