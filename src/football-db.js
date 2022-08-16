@@ -1,6 +1,6 @@
 const { firestore, Timestamp, DocumentReference } = require("./firebase-setup");
 
-const FOOTBALL_LEAGUE_COLLECTION = 'football_league';
+const FOOTBALL_LEAGUE_COLLECTION = 'football';
 const TEAM_COLLECTION = 'team';
 
 /**

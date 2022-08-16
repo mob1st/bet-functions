@@ -1,7 +1,7 @@
 const { Localized, shortIsoToDate } = require('./common-data');
 const api = require('./football-api');
 const db = require('./football-db');
-const uploadImageInvoker = require("./upload-image-invoker");
+const imageTask = require('./football-image-task');
 const { League } = require('./league');
 
 const WORLD_CUP_API_ID = 1
@@ -9,8 +9,8 @@ const WORLD_CUP_API_ID = 1
  * creates a league based on the given id. 
  * 
  * Take a look at league.js to see the supported leageus
- * @param {Object} the league info to be fetched. see the available constants
- * @param {Number} 
+ * @param {Object} league the league info to be fetched. see the available constants
+ * @param {Number} season the 4 digit year of the season
  * @returns the result operation returned by database
  * @author Pablo Baldez
  */
@@ -18,7 +18,7 @@ async function create(
     league, 
     season
 ) {
-    console.log('league-repository.create: fetching league and teams from API', league, season);    
+    console.log('league-repository.create: fetching league and teams from API', league, season);
     
     // fetch data from API
     const leagueApiId = _getApiId(league);
@@ -38,8 +38,7 @@ async function create(
 
     // persist data on our disks (db & file system)
     await db.set(data);
-    const downloadBatch = _teamImageDownloadBatch(data);
-    await _triggerImageUpload(downloadBatch);
+    await imageTask.schedule(data);    
     return data;
 }
 
@@ -67,6 +66,7 @@ function _fromApiToDb(id, nameResId, leagueResponse, teamsResponse) {
     return {
         id: id,
         apiId: leagueData.league.id,
+        imageFolderName: db.teamCollection(id),
         name: new Localized(leagueData.league.name, nameResId),
         start: shortIsoToDate(leagueData.seasons[0].start),
         end: shortIsoToDate(leagueData.seasons[0].end),
@@ -79,7 +79,7 @@ function _fromApiToDb(id, nameResId, leagueResponse, teamsResponse) {
  * @param {Object} team provided by the API
  * @returns the team handled by the database
  */
-function _teamData(team) {    
+function _teamData(team) {
     console.log('league-repository._teamData: parsing team', JSON.stringify(team));
     const code = team.code.toLowerCase();
     return {
@@ -87,27 +87,10 @@ function _teamData(team) {
         apiId: team.id,
         apiImageUrl: team.logo,
         imageFileName: imageFileName(team),
-        national: team.national,   
+        national: team.national,
         name: new Localized(team.name, `api_footbal_team_${code}_name`),
         apiImage: team.logo
     }
-}
-
-function _teamImageDownloadBatch(league) {
-    const downloadables = league.teams.map((team) => { 
-        return { 
-            url: team.apiImageUrl,
-            fileName: team.imageFileName
-        };
-    });
-    return {
-        folderName: db.teamCollection(league.id),
-        downloadables: downloadables,
-    };
-}
-
-async function _triggerImageUpload(batch) {
-    await uploadImageInvoker.invoke(batch, Date.now() / 1000);
 }
 
 function imageFileName(code) {    

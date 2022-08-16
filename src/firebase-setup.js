@@ -13,7 +13,7 @@ const storage = getStorage();
 
 module.exports = {
     // instances
-    firebaseApp,
+    firebaseApp,    
     firestore,
     storage,
 

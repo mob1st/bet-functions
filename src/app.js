@@ -1,11 +1,11 @@
 require('dotenv').config();
 const functions = require('@google-cloud/functions-framework');
 const { DownloadBatch, Downloadable, save } = require('./download-image');
-const populateLeagueUseCase = require("./populate-leagues-usecase").call;
+const createWorldCup = require("./create-world-cup-usecase").call;
 
 functions.http('bet-football', async (_req, res) => {
     try {
-        const data = await populateLeagueUseCase();
+        const data = await createWorldCup();
         console.log('finish with success', JSON.stringify(data));
         return res.status(200).send(data).end();
     } catch (e) {        
