@@ -1,6 +1,7 @@
 const { Localized, shortIsoToDate } = require('./common-data');
 const api = require('./football-api');
 const db = require('./football-db');
+const uploadImageInvoker = require("./upload-image-invoker");
 const { League } = require('./league');
 
 const WORLD_CUP_API_ID = 1
@@ -18,19 +19,28 @@ async function create(
     season
 ) {
     console.log('league-repository.create: fetching league and teams from API', league, season);    
-    const apiId = _getApiId(league);
+    
+    // fetch data from API
+    const leagueApiId = _getApiId(league);
     const [leagueResponse, teamsResponse] = await Promise.all([
-        api.fetchLeague(apiId, season),
-        api.fetchTeams(apiId, season),
+        api.fetchLeague(leagueApiId, season),
+        api.fetchTeams(leagueApiId, season),
     ]);
+
+    // prepare data
     const dbId = `${league}_${season}`;
     const data = _fromApiToDb(
         dbId, 
         `api_footbal_league_${dbId}_name`,
         leagueResponse,
         teamsResponse
-    );    
-    return await db.set(data);
+    );
+
+    // persist data on our disks (db & file system)
+    await db.set(data);
+    const downloadBatch = _teamImageDownloadBatch(data);
+    await _triggerImageUpload(downloadBatch);
+    return data;
 }
 
 function _getApiId(league) {
@@ -75,10 +85,33 @@ function _teamData(team) {
     return {
         id: `team_${code}`,
         apiId: team.id,
+        apiImageUrl: team.logo,
+        imageFileName: imageFileName(team),
         national: team.national,   
         name: new Localized(team.name, `api_footbal_team_${code}_name`),
         apiImage: team.logo
     }
+}
+
+function _teamImageDownloadBatch(league) {
+    const downloadables = league.teams.map((team) => { 
+        return { 
+            url: team.apiImageUrl,
+            fileName: team.imageFileName
+        };
+    });
+    return {
+        folderName: db.teamCollection(league.id),
+        downloadables: downloadables,
+    };
+}
+
+async function _triggerImageUpload(batch) {
+    await uploadImageInvoker.invoke(batch, Date.now() / 1000);
+}
+
+function imageFileName(code) {    
+    return `team_${code}.png`;
 }
 
 module.exports = {

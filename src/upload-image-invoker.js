@@ -1,3 +1,6 @@
+const QUEUE_NAME = 'my-queue';
+const IMAGE_INVOKER_SERVICE_ACCOUNT= `image-upload-invoker@${process.env.GOOGLE_PROJECT_ID}.iam.gserviceaccount.com`;
+const TASK_NAME = `projects/${process.env.GOOGLE_PROJECT_ID}/locations/${process.env.GOOGLE_FUNCTION_LOCATION}/queues/${QUEUE_NAME}/tasks/bilu-bilu3`;
 /**
  * invokes the service responsible to download a bunch of images and 
  * upload it
@@ -10,19 +13,23 @@ async function invoke(batch, scheduleTime) {
     
     const parent = client.queuePath(
         process.env.GOOGLE_PROJECT_ID,
-        process.env.GOOGLE_FUNCTION_LOCATION, 
-        'upload-image-queue',
+        process.env.GOOGLE_FUNCTION_LOCATION,
+        QUEUE_NAME,
     );
+    const payload = JSON.stringify(batch);
     const task = {
+        name: TASK_NAME,
         httpRequest: {
             httpMethod: 'POST',
             url: process.env.IMAGE_FUNCTION_URL,
-            body: batch,
+            body: Buffer.from(payload).toString("base64"),
             oidcToken: {
-                serviceAccountEmail: process.env.IMAGE_INVOKER_SERVICE_ACCOUNT
+                serviceAccountEmail: IMAGE_INVOKER_SERVICE_ACCOUNT
             }
         },
-        scheduleTime: scheduleTime,
+        scheduleTime: {
+            seconds: scheduleTime
+        },
     };
     console.log('image-invoker.invoke: creating task', task);
     const request = { parent: parent, task: task };
