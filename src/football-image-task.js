@@ -29,9 +29,14 @@ async function schedule(league) {
     console.log('football-image-task.schedule: task created', response.name);
 }
 
+/**
+ * Uses the given league to create the Google Task body request
+ * @param {Object} league the given league
+ * @returns the Task structure used by Google Tasks
+ */
 function _task(league) {
     const payload = {
-        leagueId: league.id,        
+        id: league.id,        
         batch: _teamImageDownloadBatch(league)
     };
     const task = {        
@@ -64,7 +69,7 @@ function _scheduleTime() {
 /**
  * Converts the league data into batch of images to download and file names to be created
  * @param {Object} league 
- * @returns 
+ * @returns the list of downloadables
  */
 function _teamImageDownloadBatch(league) {
     return league.teams.map((team) => { 
