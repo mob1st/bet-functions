@@ -63,14 +63,14 @@ function _fromApiToDb(id, nameResId, leagueResponse, teamsResponse) {
     console.log('league-repository._fromApiToDb: handle teams',  JSON.stringify(teamsResponse));
     const leagueData = leagueResponse.response[0];
     const teams = teamsResponse.response;
+    const teamImageFolderName = db.teamCollection(id);
     return {
         id: id,
-        apiId: leagueData.league.id,
-        imageFolderName: db.teamCollection(id),
+        apiId: leagueData.league.id,        
         name: new Localized(leagueData.league.name, nameResId),
         start: shortIsoToDate(leagueData.seasons[0].start),
         end: shortIsoToDate(leagueData.seasons[0].end),
-        teams: teams.map((teamData) => _teamData(teamData.team)),
+        teams: teams.map((teamData) => _teamData(teamImageFolderName, teamData.team)),
     };
 }
 
@@ -79,22 +79,37 @@ function _fromApiToDb(id, nameResId, leagueResponse, teamsResponse) {
  * @param {Object} team provided by the API
  * @returns the team handled by the database
  */
-function _teamData(team) {
+function _teamData(imageFolderName, team) {
     console.log('league-repository._teamData: parsing team', JSON.stringify(team));
     const code = team.code.toLowerCase();
+    const id = `team_${code}`;
     return {
         id: `team_${code}`,
         apiId: team.id,
         apiImageUrl: team.logo,
-        imageFileName: imageFileName(team),
+        imageFileName: `${imageFolderName}/${id}.${_getUrlExtension(team.logo)}`,
         national: team.national,
         name: new Localized(team.name, `api_footbal_team_${code}_name`),
         apiImage: team.logo
     }
 }
 
-function imageFileName(code) {    
-    return `team_${code}.png`;
+/**
+ * Returns the extension provided by the given URL
+ * 
+ * Given the examples:
+ * - https://example.com/folder/file.jpg
+ * - https://example.com/fold.er/fil.e.jpg?param.eter#hash=12.345
+ * The return will be 'jpg'
+ * @param {String} url 
+ * @returns the extension of the file
+ */
+function _getUrlExtension(url) {
+    return url
+            .split(/[#?]/)[0]
+            .split('.')
+            .pop()
+            .trim();
 }
 
 module.exports = {

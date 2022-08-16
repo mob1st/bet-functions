@@ -1,4 +1,4 @@
-const { firestore, Timestamp, DocumentReference } = require("./firebase-setup");
+const { firestore, Timestamp, DocumentReference, PUBLIC_STORAGE_URL} = require("./firebase-setup");
 
 const FOOTBALL_LEAGUE_COLLECTION = 'football';
 const TEAM_COLLECTION = 'team';
@@ -6,8 +6,7 @@ const TEAM_COLLECTION = 'team';
 /**
  * Persists the given league data mapping the properties to something that can be sent to
  * a football on `firestore`.
- * 
- * @param {Object} leagueData 
+ * @param {Object} leagueData the data to be persisted
  */
 async function set(leagueData) {
 	console.log('football-db.set: persisting league data', JSON.stringify(leagueData));
@@ -19,12 +18,17 @@ async function set(leagueData) {
 	return leagueData;
 }
 
-function teamCollection(leagueId){
-	return `${FOOTBALL_LEAGUE_COLLECTION}/${leagueId}/${TEAM_COLLECTION}/`;
+/**
+ * Defines the collection address of teams playing a specific league
+ * @param {String} leagueId the id of the given list
+ * @returns a string containing the collection address of teams
+ */
+function teamCollection(leagueId) {
+	return `${FOOTBALL_LEAGUE_COLLECTION}/${leagueId}/${TEAM_COLLECTION}`;
 }
 
 /**
- * persist the given league data into league collection on firestore
+ * Persist the given league data into league collection on firestore
  * @param {DocumentReference} leagueDocRef collection used for persistence
  * @param {Object} leagueData data to be persisted
  * @returns {Promise} result of set
@@ -40,7 +44,7 @@ function _populateLeague(leagueDocRef, leagueData) {
 }
 
 /**
- * persist in batch the given list of teams into league/team collection on firestore
+ * Persist in batch the given list of teams into league/team collection on firestore
  * @param {DocumentReference} leagueRef collection used for persistence
  * @param {Array<Object>} teams data to be persisted
  * @returns {Promise} result of set
@@ -54,7 +58,8 @@ function _populateTeams(leagueRef, teams) {
 		batch.set(teamRef, {
 			apiId: team.apiId,
 			name: team.name.toJSON(),
-			national: team.national
+			national: team.national,
+			imageUrl: `${PUBLIC_STORAGE_URL}/${team.imageFileName}`,
 		});
 	});	
 	console.log('footbal-db._populateTeams: batch.commit');

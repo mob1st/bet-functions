@@ -23,7 +23,7 @@ async function schedule(league) {
     const task = _task(league);
     const request = { parent: parent, task: task };
     console.log('football-image-task.schedule: creating task', request);
-    
+
     // enqueue Google Task
     const [response] = await client.createTask(request);
     console.log('football-image-task.schedule: task created', response.name);
@@ -67,16 +67,12 @@ function _scheduleTime() {
  * @returns 
  */
 function _teamImageDownloadBatch(league) {
-    const downloadables = league.teams.map((team) => { 
+    return league.teams.map((team) => { 
         return { 
             url: team.apiImageUrl,
             fileName: team.imageFileName
         };
-    });
-    return {
-        folderName: league.imageFolderName,
-        downloadables: downloadables,
-    };
+    });    
 }
 
 module.exports = {
