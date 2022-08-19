@@ -60,9 +60,8 @@ function _populateTeams(leagueRef, teams) {
 		const teamRef = leagueRef.collection(TEAM_COLLECTION).doc(team.id);
 		batch.set(teamRef, {
 			apiId: team.apiId,
-			name: team.name.toJSON(),
-			national: team.national,
-			imageUrl: `${PUBLIC_STORAGE_URL}/${team.imageFileName}`,
+			name: team.name.toJSON(),			
+			imageUrl: _teamImageUrl(team),
 		});
 	});	
 	console.log('footbal-db._populateTeams: batch.commit');
@@ -75,7 +74,7 @@ function _populateTeams(leagueRef, teams) {
  * @param {Array<Object>} matches data to be persisted
  * @returns {Promise} result of set
  */
-async function _populateMatches(leagueRef, teams, matches) {
+async function _populateMatches(leagueRef, matches) {
 	console.log('footbal-db._populateMatches', JSON.stringify(matches));		
 	const batch = firestore.batch();
 	matches.forEach(function (match) {	
@@ -85,9 +84,8 @@ async function _populateMatches(leagueRef, teams, matches) {
 		batch.set(matchReaf, {			
 			apiId: match.apiId,
 			date: Timestamp.fromDate(match.date),
-			status: 'NS',
-			allowDraw: true,
-			contendores: [
+			status: 'NS',			
+			contenders: [
 				{
 					home: true,
 					name: home.name.toJSON(),
@@ -100,14 +98,8 @@ async function _populateMatches(leagueRef, teams, matches) {
 					imageUrl: _teamImageUrl(away),
 					ref: leagueRef.collection(TEAM_COLLECTION).doc(away.id)
 				},				
-			],
-			group: {
-				name: match.group.name
-			},
-			round: {
-				name: match.round.toJSON(),
-				ref: leagueRef.collection().doc(match.round.id)
-			}
+			],			
+			round: match.round
 		});
 	});
 	console.log('footbal-db._populateMatches: batch.commit');
