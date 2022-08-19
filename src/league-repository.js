@@ -70,13 +70,11 @@ function _fromApiToDb(id, nameResId, leagueResponse, teamsResponse, matchesRespo
     
     const teamImageFolderName = db.teamCollection(id);
     const teamsBinaryTree = new BinarySearchTree((a, b) => a.id - b.id);
-    const teams = teamsResponse.response.map((teamData) => {        
-        console.log('inseri o role tiooo', JSON.stringify(teamData));
+    const teams = teamsResponse.response.map((teamData) => {
         const team = teamData.team;
         teamsBinaryTree.insert(team);
         return _teamData(teamImageFolderName, team);
-    });
-    console.log('o que to fazendo de errrado caraio', teamsBinaryTree.count());
+    });    
     const matches = matchesResponse.response.map(
         (matchData) => _matchData(teamImageFolderName, teamsBinaryTree, matchData)
     );
@@ -97,15 +95,14 @@ function _fromApiToDb(id, nameResId, leagueResponse, teamsResponse, matchesRespo
  * @returns the team handled by the database
  */
 function _teamData(imageFolderName, team) {
-    console.log('league-repository._teamData: parsing team', JSON.stringify(team));
-    const code = team.code.toLowerCase();
-    const id = `team_${code}`;
+    console.log('league-repository._teamData: parsing team', JSON.stringify(team));    
+    const id = _teamId(team);
     return {
         id: id,
         apiId: team.id,
         apiImageUrl: team.logo,
         imageFileName: `${imageFolderName}/${id}.${_getUrlExtension(team.logo)}`,        
-        name: new Localized(team.name, `api_footbal_team_${code}_name`),
+        name: new Localized(team.name, `api_footbal_${id}_name`),
         apiImage: team.logo
     }
 }
@@ -130,7 +127,7 @@ function _matchData(teamImageFolderName, teamsBinaryTree, match) {
     const round = match.league.round;
     console.log('league-repository._matchData: ---------');
     return {
-        id: `${home.id}X${away.id}-${round}`,
+        id: `${round}:${_teamId(home)}X${_teamId(away)}`,
         apiId: fixture.id,
         date: new Date(fixture.date),
         home: _teamData(teamImageFolderName, home),
@@ -140,6 +137,11 @@ function _matchData(teamImageFolderName, teamsBinaryTree, match) {
             round: round,
         },
     }
+}
+
+function _teamId(apiTeam) {
+    const code = apiTeam.code.toLowerCase();
+    return `team_${code}`;
 }
 
 /**
