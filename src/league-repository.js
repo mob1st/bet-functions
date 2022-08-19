@@ -86,8 +86,8 @@ function _fromApiToDb(id, nameResId, leagueResponse, teamsResponse, matchesRespo
         name: new Localized(leagueData.league.name, nameResId),
         start: shortIsoToDate(leagueData.seasons[0].start),
         end: shortIsoToDate(leagueData.seasons[0].end),
-        teams: teams.map((teamData) => _teamData(teamImageFolderName, teamData.team)),
-        matches: matches.map((matchData) => _matchData(teamImageFolderName, matchData))
+        teams: teams,
+        matches: matches
     };
 }
 
@@ -121,12 +121,14 @@ function _teamData(imageFolderName, team) {
  * @returns {Object} the match structure
  */
 function _matchData(teamImageFolderName, teamsBinaryTree, match) {
-    console.log('league-repository._matchData: parsing match', JSON.stringify(match));
-    console.log('league-repository._matchData: binary tree', teamImageFolderName.toString());
+    console.log('league-repository._matchData: parsing match', JSON.stringify(match.fixture.id));    
     const fixture = match.fixture;
+    console.log('league-repository._matchData: finding home', JSON.stringify(match.teams.home));
     const home = teamsBinaryTree.find(match.teams.home).getValue();
-    const away = teamsBinaryTree.find(match.teams.home).getValue();
+    console.log('league-repository._matchData: finding away', JSON.stringify(match.teams.away));
+    const away = teamsBinaryTree.find(match.teams.away).getValue();
     const round = match.league.round;
+    console.log('league-repository._matchData: ---------');
     return {
         id: `${home.id}X${away.id}-${round}`,
         apiId: fixture.id,
