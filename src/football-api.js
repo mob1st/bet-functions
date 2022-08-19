@@ -40,8 +40,18 @@ async function fetchTeams(league, season) {
         params: { league: league, season: season }
     };    
     console.log('football-api.fetchTeams', JSON.stringify(options));
-    const response = await footbalApi.get('/teams', options);    
+    const response = await footbalApi.get('/teams', options);
     _logResponse('teams', response);
+    return response.data;
+}
+
+async function fetchMatches(league, season) {
+    const options = {
+        params: { league: league, season: season }
+    };
+    console.log('football-api.fetchMatches', JSON.stringify(options));
+    const response = await footbalApi.get('/fixtures', options);
+    _logResponse('matches', response);
     return response.data;
 }
 
@@ -51,5 +61,6 @@ function _logResponse(path, response) {
 
 module.exports = {
     fetchLeague,
-    fetchTeams,    
+    fetchTeams,
+    fetchMatches
 };

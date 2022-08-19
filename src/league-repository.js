@@ -2,11 +2,12 @@ const { Localized, shortIsoToDate } = require('./common-data');
 const api = require('./football-api');
 const db = require('./football-db');
 const imageTask = require('./football-image-task');
+const { BinarySearchTree } = require('@datastructures-js/binary-search-tree')
 const { League } = require('./league');
 
 const WORLD_CUP_API_ID = 1
 /**
- * creates a league based on the given id. 
+ * Creates a league based on the given id. 
  * 
  * Take a look at league.js to see the supported leageus
  * @param {Object} league the league info to be fetched. see the available constants
@@ -22,9 +23,10 @@ async function create(
     
     // fetch data from API
     const leagueApiId = _getApiId(league);
-    const [leagueResponse, teamsResponse] = await Promise.all([
+    const [leagueResponse, teamsResponse, matchesResponse] = await Promise.all([
         api.fetchLeague(leagueApiId, season),
         api.fetchTeams(leagueApiId, season),
+        api.fetchMatches(leagueApiId, season)
     ]);
 
     // prepare data
@@ -33,7 +35,8 @@ async function create(
         dbId, 
         `api_footbal_league_${dbId}_name`,
         leagueResponse,
-        teamsResponse
+        teamsResponse,
+        matchesResponse,
     );
 
     // persist data on our disks (db & file system)
@@ -51,19 +54,32 @@ function _getApiId(league) {
 }
 
 /**
- * Maps the response from Football API to our data model that will be used by the clients
+ * Maps the response from Football API to our data model that will be used by the clients.
+ * 
  * @param {String} id the id of the data. should be some predefined value based on the content loaded
  * @param {String} nameResId the localized name of the league
- * @param {Object} leagueResponse the response from the API respective to the league
- * @param {Object} teamsResponse the response from the API respective to the teams of the league
+ * @param {Array<Object>} leagueResponse the response from the API respective to the league
+ * @param {Array<Object>} teamsResponse the response from the API respective to the teams of the league
+ * @param {Array<Object>} matchesResponse the matches response from the API respective to the matches of the league
  * @returns the data object that will be persisted by the database
  */
-function _fromApiToDb(id, nameResId, leagueResponse, teamsResponse) {
+function _fromApiToDb(id, nameResId, leagueResponse, teamsResponse, matchesResponse) {
     console.log('league-repository._fromApiToDb: handle leagues', JSON.stringify(leagueResponse));
     console.log('league-repository._fromApiToDb: handle teams',  JSON.stringify(teamsResponse));
-    const leagueData = leagueResponse.response[0];
-    const teams = teamsResponse.response;
+    const leagueData = leagueResponse.response[0];    
+    
     const teamImageFolderName = db.teamCollection(id);
+    const teamsBinaryTree = new BinarySearchTree((a, b) => a.id - b.id);
+    const teams = teamsResponse.response.map((teamData) => {        
+        console.log('inseri o role tiooo', JSON.stringify(teamData));
+        const team = teamData.team;
+        teamsBinaryTree.insert(team);
+        return _teamData(teamImageFolderName, team);
+    });
+    console.log('o que to fazendo de errrado caraio', teamsBinaryTree.count());
+    const matches = matchesResponse.response.map(
+        (matchData) => _matchData(teamImageFolderName, teamsBinaryTree, matchData)
+    );
     return {
         id: id,
         apiId: leagueData.league.id,        
@@ -71,11 +87,12 @@ function _fromApiToDb(id, nameResId, leagueResponse, teamsResponse) {
         start: shortIsoToDate(leagueData.seasons[0].start),
         end: shortIsoToDate(leagueData.seasons[0].end),
         teams: teams.map((teamData) => _teamData(teamImageFolderName, teamData.team)),
+        matches: matches.map((matchData) => _matchData(teamImageFolderName, matchData))
     };
 }
 
 /**
- * converts the given team from the API to the structure we will persist on the databa
+ * Converts the given team from the API to the structure we will persist on the database
  * @param {Object} team provided by the API
  * @returns the team handled by the database
  */
@@ -84,13 +101,42 @@ function _teamData(imageFolderName, team) {
     const code = team.code.toLowerCase();
     const id = `team_${code}`;
     return {
-        id: `team_${code}`,
+        id: id,
         apiId: team.id,
         apiImageUrl: team.logo,
-        imageFileName: `${imageFolderName}/${id}.${_getUrlExtension(team.logo)}`,
-        national: team.national,
+        imageFileName: `${imageFolderName}/${id}.${_getUrlExtension(team.logo)}`,        
         name: new Localized(team.name, `api_footbal_team_${code}_name`),
         apiImage: team.logo
+    }
+}
+
+/**
+ * Receives the match from API and maps it to our model.
+ * 
+ * Once the match structure from API has home and away teams without the code, used in the logic team Id definition,
+ * I need to search in the current teams list
+ * @param {String} teamImageFolderName the folder name used for the teams
+ * @param {BinarySearchTree<Object>} teamsBinaryTree the binary search structure to find teams by id
+ * @param {Object} match the match from API
+ * @returns {Object} the match structure
+ */
+function _matchData(teamImageFolderName, teamsBinaryTree, match) {
+    console.log('league-repository._matchData: parsing match', JSON.stringify(match));
+    console.log('league-repository._matchData: binary tree', teamImageFolderName.toString());
+    const fixture = match.fixture;
+    const home = teamsBinaryTree.find(match.teams.home).getValue();
+    const away = teamsBinaryTree.find(match.teams.home).getValue();
+    const round = match.league.round;
+    return {
+        id: `${home.id}X${away.id}-${round}`,
+        apiId: fixture.id,
+        date: new Date(fixture.date),
+        home: _teamData(teamImageFolderName, home),
+        away: _teamData(teamImageFolderName, away),
+        round: {
+            allowDraw: true,
+            round: round,
+        },
     }
 }
 

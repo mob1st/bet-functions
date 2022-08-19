@@ -68,7 +68,7 @@ function _scheduleTime() {
 
 /**
  * Converts the league data into batch of images to download and file names to be created
- * @param {Object} league 
+ * @param {Object} league the data holder
  * @returns the list of downloadables
  */
 function _teamImageDownloadBatch(league) {
