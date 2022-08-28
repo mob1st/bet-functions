@@ -1,5 +1,5 @@
 const { QueryDocumentSnapshot } = require("firebase-admin/firestore");
-const { firestore, Timestamp, DocumentReference, PUBLIC_STORAGE_URL} = require("./firebase-setup");
+const { firestore, Timestamp, DocumentReference, PUBLIC_STORAGE_URL } = require("./firebase-setup");
 
 const FOOTBALL_LEAGUE_COLLECTION = 'football';
 const TEAM_COLLECTION = 'team';
@@ -60,10 +60,10 @@ function _populateTeams(leagueRef, teams) {
 		const teamRef = leagueRef.collection(TEAM_COLLECTION).doc(team.id);
 		batch.set(teamRef, {
 			apiId: team.apiId,
-			name: team.name.toJSON(),			
+			name: team.name.toJSON(),
 			imageUrl: _teamImageUrl(team),
 		});
-	});	
+	});
 	console.log('footbal-db._populateTeams: batch.commit');
 	return batch.commit();
 }
@@ -75,16 +75,16 @@ function _populateTeams(leagueRef, teams) {
  * @returns {Promise} result of set
  */
 async function _populateMatches(leagueRef, matches) {
-	console.log('footbal-db._populateMatches', JSON.stringify(matches));		
+	console.log('footbal-db._populateMatches', JSON.stringify(matches));
 	const batch = firestore.batch();
-	matches.forEach(function (match) {	
+	matches.forEach(function (match) {
 		const home = match.home;
 		const away = match.away;
 		const matchReaf = leagueRef.collection(MATCH_COLLECTION).doc(match.id);
-		batch.set(matchReaf, {			
+		batch.set(matchReaf, {
 			apiId: match.apiId,
 			date: Timestamp.fromDate(match.date),
-			status: 'NS',			
+			status: 'NS',
 			contenders: [
 				{
 					home: true,
@@ -97,8 +97,8 @@ async function _populateMatches(leagueRef, matches) {
 					away: away.name.toJSON(),
 					imageUrl: _teamImageUrl(away),
 					ref: leagueRef.collection(TEAM_COLLECTION).doc(away.id)
-				},				
-			],			
+				},
+			],
 			round: match.round
 		});
 	});

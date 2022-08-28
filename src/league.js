@@ -3,5 +3,5 @@ const League = {
 }
 
 module.exports = {
-    League    
+    League
 }

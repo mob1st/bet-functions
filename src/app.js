@@ -1,37 +1,74 @@
 require('dotenv').config();
 const functions = require('@google-cloud/functions-framework');
-const { DownloadBatch, Downloadable, save } = require('./download-image');
-const createWorldCup = require("./create-world-cup-usecase").call;
+const createCompetitionUseCase = require('./create-competition-usecase');
+const { ServerError } = require('./server-error');
 
-functions.http('bet-football', async (_req, res) => {
+functions.http('bet-football', async (req, res) => {
     try {
-        const data = await createWorldCup();
+        assertHttpMethod(req);
+        const data = await createCompetitionUseCase.call(req.body);
         console.log('finish with success', JSON.stringify(data));
-        return res.status(200).send(data).end();
-    } catch (e) {        
+        return res.status(200).contentType('application/json').send(data).end();
+    } catch (e) {
         console.error('some error happens on popuplate football-league data', e);
-        return res.status(500).send(_jsonError(e)).end();
+        const errorResponse = handleError(e);
+        console.log('response %s', JSON.stringify(errorResponse.body))
+        return res.status(errorResponse.statusCode)
+            .contentType('application/json')
+            .send(JSON.stringify(errorResponse.body))
+            .end();
     }
 });
 
-functions.http('image-downloader', async (_req, res) => {
-    try {        
-        const downloadables = [
-            new Downloadable('https://product-images-qa.qa-getmayd.com/img/banners/production/en-us/fallback/homescreen_top_4.png', 'first.png'),
-            new Downloadable('https://product-images-qa.qa-getmayd.com/img/banners/production/v2/home/EN/en_vomex.png', 'second.png'),
-            new Downloadable('https://product-images-qa.qa-getmayd.com/img/banners/production/de-de/homescreen_top_welcomevoucher.png', 'third.png'),
-            new Downloadable('https://product-images-qa.qa-getmayd.com/img/banners/production/v2/home/DE/de_hexal_kopfschmerzen.png', 'fourth.png')        
-        ];
-        const batch = new DownloadBatch("sample", downloadables);
-        await save(batch);
-        console.log('finish request');
-        return res.status(200).send({message: 'finish with success'});
-    } catch(e) {
-        console.error('some error happens on popuplate league data', e);
-        return res.status(500).send(_jsonError(e));
+function assertHttpMethod(req) {
+    if (req.method != 'POST') {
+        throw InvalidHttpMethod(req.method);
     }
-});
+}
 
-function _jsonError(e) {
-    return JSON.stringify(e, Object.getOwnPropertyNames(e));
+/**
+ * 
+ * @param {Error} e 
+ * @returns {Object}
+ */
+function handleError(e) {
+    let body;
+    let statusCode = 500;
+    console.log('handle error');
+    switch (true) {
+        case e instanceof InvalidHttpMethodError:
+            console.log('invalid http error');
+            body = e.toJSON();
+            statusCode = 405;
+            break;
+        case e instanceof ServerError:
+            console.log('server error');
+            body = e.toJSON()
+            break;
+        default:
+            console.log('different error');
+            body = {
+                message: e.message,
+                name: 'Unknown Error'
+            };
+            break;
+    }
+    return {
+        statusCode: statusCode,
+        body: body,
+    }
+}
+
+class InvalidHttpMethodError extends Error {
+    constructor(method) {
+        super('Invalid Method', `Http method not allowed`);
+        this.method = method;
+    }
+
+    toJSON() {
+        return {
+            message: this.message,
+            method: this.method,
+        };
+    }
 }
