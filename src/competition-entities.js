@@ -112,7 +112,7 @@ class Confrontation {
         this.allowBetsUntil = allowBetsUntil;
         this.round = round;
         this.expectedDuration = expectedDuration;
-        this.contests = contest;
+        this.contest = contest;
     }
 }
 

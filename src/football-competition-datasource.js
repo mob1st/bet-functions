@@ -99,7 +99,7 @@ function _footballConfrontation(teamsBinaryTree, match) {
         allowBetsUntil: new Date(fixture.date),
         round: round,
         group: home.group,
-        contests: FootballMatch.Factory(
+        contest: FootballMatch.Factory(
             { code: home.code, logo: home.logo },
             { code: away.code, logo: away.logo }
         ),
