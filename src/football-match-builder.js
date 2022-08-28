@@ -1,5 +1,6 @@
 const { Duo, Node } = require('./common-data');
 const { OddsType, Bet } = require('./bet-entities');
+const { Duel, MultipleChoice } = require('./contest-entities');
 
 /**
  * Creates a {@link Node} containing a duel and the scores of the duel
@@ -72,23 +73,25 @@ function betsForScores(teams) {
  * 
  * @param {Team} winner
  * @param {Team} loser
- * @returns {Array<Bet>}
+ * @returns {MultipleChoice}
  */
 function scoresForTeam(winner, loser) {
-    return [
-        betForScore(
-            { first: winner, second: loser },
-            { first: 1, second: 0 },
-        ),
-        betForScore(
-            { first: winner, second: loser },
-            { first: 2, second: 0 },
-        ),
-        betForScore(
-            { first: winner, second: loser },
-            { first: 2, second: 1 },
-        ),
-    ]
+    return {
+        contenders: [
+            betForScore(
+                { first: winner, second: loser },
+                { first: 1, second: 0 },
+            ),
+            betForScore(
+                { first: winner, second: loser },
+                { first: 2, second: 0 },
+            ),
+            betForScore(
+                { first: winner, second: loser },
+                { first: 2, second: 1 },
+            ),
+        ]
+    }
 }
 
 /**

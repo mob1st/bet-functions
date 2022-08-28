@@ -32,5 +32,6 @@ class MultipleChoice {
 
 }
 module.exports = {
-    Duel
+    Duel,
+    MultipleChoice
 }

@@ -1,3 +1,4 @@
+const { Node } = require("./common-data");
 const { Duel } = require("./contest-entities");
 const builder = require("./football-match-builder");
 
