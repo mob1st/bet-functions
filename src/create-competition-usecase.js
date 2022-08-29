@@ -1,13 +1,17 @@
 const factory = require('./competition-datasource-factory');
 const { CompetitionInput } = require('./competition-entities');
+const db = require('./competition-db');
 
 /**
  * 
- * @param {CompetitionInput} input
+ * @param {Object} input
  */
-async function call(input) {
+async function call(body) {
+    const input = await db.getInput(body.type, body.code, body.season);
     const datasource = factory.createDataSource(input);
-    return await datasource.fetch(input);
+    const competition = await datasource.fetch(input);
+    await db.create(input, competition);
+    return competition;
 }
 
 module.exports = {

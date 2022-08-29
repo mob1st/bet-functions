@@ -1,5 +1,5 @@
 const api = require('./rapid-football-api');
-const { CompetitionInput, Competition, Confrontation } = require('./competition-entities');
+const { CompetitionInput, Competition, Confrontation, ConfrontationStatus } = require('./competition-entities');
 const { FootballMatch } = require('./football-entities');
 const { AvlTree } = require('@datastructures-js/binary-search-tree');
 const fs = require('fs');
@@ -19,11 +19,11 @@ async function fetch(input) {
         api.fetchGroups(input.apiId, input.season),
         api.fetchRounds(input.apiId, input.season),
     ]);
-    return buildCompetition(...responses);
+    return buildCompetition(input, ...responses);
 }
 
 /**
- * 
+ * @param {CompetitionInput} input
  * @param {Array<Object>} leagueResponse 
  * @param {Array<Object>} teamsResponse 
  * @param {Array<Object>} matchesResponse 
@@ -32,6 +32,7 @@ async function fetch(input) {
  * @return {Competition}
  */
 function buildCompetition(
+    input,
     translations,
     leagueResponse,
     teamsResponse,
@@ -46,13 +47,14 @@ function buildCompetition(
     );
     const season = leagueData.seasons[0];
     return {
+        code: input.code,
         season: leagueData.seasons[0].year,
+        name: translations.competition_name,
         startAt: new Date(season.start),
         endAt: new Date(season.end),
         currentRound: 0,
         rounds: roundsResponse.response,
         confrontations: confrontations,
-        name: translations.competition_name
     }
 }
 
@@ -110,10 +112,12 @@ function _footballConfrontation(translations, teamsBinaryTree, match) {
     const round = match.league.round;
     return {
         expectedDuration: 90,
+        apiId: fixture.id,
         startAt: new Date(fixture.date),
         allowBetsUntil: new Date(fixture.date),
         round: round,
         group: home.group,
+        status: ConfrontationStatus.NotStarted,
         contest: FootballMatch.Factory(
             { code: home.code, logo: home.logo, name: translations[teamName(home)] },
             { code: away.code, logo: away.logo, name: translations[teamName(away)] }

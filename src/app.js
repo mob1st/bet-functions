@@ -9,9 +9,7 @@ functions.http('bet-football', async (req, res) => {
         const data = await createCompetitionUseCase.call(req.body);
         return res.status(200).contentType('application/json').send(data).end();
     } catch (e) {
-        console.error('some error happens on popuplate football-league data', e);
         const errorResponse = handleError(e);
-        console.log('response %s', JSON.stringify(errorResponse.body))
         return res.status(errorResponse.statusCode)
             .contentType('application/json')
             .send(JSON.stringify(errorResponse.body))

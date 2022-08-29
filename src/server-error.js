@@ -12,7 +12,7 @@ class ServerError extends Error {
      * @param {String} message the message to facilitate the debug describing what happens
      */
     constructor(code, message) {
-        super('Server Error', message);
+        super(message, 'Server Error');
         this.code = code;
     }
 
@@ -26,5 +26,6 @@ class ServerError extends Error {
 }
 
 module.exports = {
+    ErrorCode,
     ServerError
 }

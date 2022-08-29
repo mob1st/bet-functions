@@ -1,5 +1,6 @@
 const footballDataSource = require('./football-competition-datasource');
 const { CompetitionType } = require('./competition-entities');
+const { ServerError, ErrorCode } = require('./server-error');
 
 /**
  * Each type of competition can have a different competition datasource handler.
@@ -12,7 +13,7 @@ function createDataSource(input) {
         case CompetitionType.Football:
             return footballDataSource;
         default:
-            throw new ServerError(Errors.INVALID_COMPETITION_TYPE, `competition type is not allowed: ${input.type}`);
+            throw new ServerError(ErrorCode.INVALID_COMPETITION_TYPE, `competition type is not allowed: ${input.type}`);
     }
 }
 
