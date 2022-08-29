@@ -19,17 +19,18 @@ class FootballMatch extends Duel {
 }
 
 class Team {
-    constructor(code, logo) {
+    constructor(code, name, logo) {
         this.code = code;
         this.logo = logo;
+        this.name = name;
     }
 
-    fileName() {
-        return 'fileName';
-    }
-
-    name() {
-        return 'teammmm';
+    toJSON() {
+        return {
+            code: this.code,
+            logo: this.code,
+            name: this.name
+        };
     }
 }
 

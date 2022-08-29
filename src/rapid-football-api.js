@@ -59,7 +59,7 @@ async function _fetch(
         path,
         JSON.stringify(params),
         response.status,
-        JSON.stringify(data),
+        JSON.stringify(data.results),
     );
     return data;
 }

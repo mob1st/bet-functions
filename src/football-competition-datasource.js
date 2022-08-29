@@ -1,7 +1,9 @@
 const api = require('./rapid-football-api');
-const { CompetitionInput, åCompetition, Confrontation } = require('./competition-entities');
+const { CompetitionInput, Competition, Confrontation } = require('./competition-entities');
 const { FootballMatch } = require('./football-entities');
 const { AvlTree } = require('@datastructures-js/binary-search-tree');
+const fs = require('fs');
+const path = require('path');
 
 /**
  * Uses the API-Football to create the competition based on the given entry
@@ -10,15 +12,14 @@ const { AvlTree } = require('@datastructures-js/binary-search-tree');
  */
 async function fetch(input) {
     const responses = await Promise.all([
+        competitionTranslation(input.code),
         api.fetchLeague(input.apiId, input.season),
         api.fetchTeams(input.apiId, input.season),
         api.fetchMatches(input.apiId, input.season),
         api.fetchGroups(input.apiId, input.season),
         api.fetchRounds(input.apiId, input.season),
     ]);
-    return buildCompetition(
-        ...responses
-    );
+    return buildCompetition(...responses);
 }
 
 /**
@@ -30,16 +31,18 @@ async function fetch(input) {
  * @param {Array<Object>} roundsResponse 
  * @return {Competition}
  */
-function buildCompetition(leagueResponse, teamsResponse, matchesResponse, groupsResponse, roundsResponse) {
+function buildCompetition(
+    translations,
+    leagueResponse,
+    teamsResponse,
+    matchesResponse,
+    groupsResponse,
+    roundsResponse,
+) {
     const leagueData = leagueResponse.response[0];
     const teamsBinaryTree = _teamsBinaryTree(groupsResponse.response, teamsResponse.response);
-    console.debug('ptest tree %s', JSON.stringify(teamsBinaryTree.root().getValue()));
-    console.debug('ptest tree %s', JSON.stringify(teamsBinaryTree.root().getLeft().getValue()));
-    console.debug('ptest tree %s', JSON.stringify(teamsBinaryTree.root().getRight().getValue()));
-    console.debug('ptest tree %s', JSON.stringify(teamsBinaryTree.root().getLeftHeight()));
-    console.debug('ptest tree %s', JSON.stringify(teamsBinaryTree.root().getRightHeight()));
     const confrontations = matchesResponse.response.map(
-        (match) => _footballConfrontation(teamsBinaryTree, match)
+        (match) => _footballConfrontation(translations, teamsBinaryTree, match)
     );
     const season = leagueData.seasons[0];
     return {
@@ -48,8 +51,21 @@ function buildCompetition(leagueResponse, teamsResponse, matchesResponse, groups
         endAt: new Date(season.end),
         currentRound: 0,
         rounds: roundsResponse.response,
-        confrontations: confrontations
+        confrontations: confrontations,
+        name: translations.competition_name
     }
+}
+
+function competitionTranslation(competitionCode) {
+    return new Promise((resolve, reject) => {
+        try {
+            const jsonPath = path.join(__dirname, '..', 'static/translations', `${competitionCode}.json`);
+            const jsonString = fs.readFileSync(jsonPath, 'utf-8');
+            resolve(JSON.parse(jsonString));
+        } catch (e) {
+            reject(e);
+        }
+    });
 }
 
 /**
@@ -87,9 +103,8 @@ function _teamsBinaryTree(groupsResponse, teamsResponse) {
  * @param {Object} match the match from API
  * @returns {Confrontation} the match structure
  */
-function _footballConfrontation(teamsBinaryTree, match) {
+function _footballConfrontation(translations, teamsBinaryTree, match) {
     const fixture = match.fixture;
-    console.debug('match %s', JSON.stringify(match));
     const home = teamsBinaryTree.find(match.teams.home).getValue();
     const away = teamsBinaryTree.find(match.teams.away).getValue();
     const round = match.league.round;
@@ -100,10 +115,14 @@ function _footballConfrontation(teamsBinaryTree, match) {
         round: round,
         group: home.group,
         contest: FootballMatch.Factory(
-            { code: home.code, logo: home.logo },
-            { code: away.code, logo: away.logo }
+            { code: home.code, logo: home.logo, name: translations[teamName(home)] },
+            { code: away.code, logo: away.logo, name: translations[teamName(away)] }
         ),
     }
+}
+
+function teamName(team) {
+    return `competition_team_${team.code.toLowerCase()}_name`;
 }
 
 module.exports = {

@@ -38,7 +38,7 @@ function betForTeam(team) {
             type: OddsType.American,
             value: 0
         },
-        subject: team
+        subject: team,
     };
 }
 

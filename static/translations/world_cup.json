@@ -1,0 +1,134 @@
+{
+    "competition_name": {
+        "pt-br": "Copa do Mundo",
+        "en-us": "World Cup"
+    },
+    "competition_team_bel_name": {
+        "pt-br": "Bélgica",
+        "en-us": "Belgium"
+    },
+    "competition_team_fra_name": {
+        "pt-br": "França",
+        "en-us": "France"
+    },
+    "competition_team_cro_name": {
+        "pt-br": "Croácia",
+        "en-us": "Croatia"
+    },
+    "competition_team_bra_name": {
+        "pt-br": "Brasil",
+        "en-us": "Brazil"
+    },
+    "competition_team_uru_name": {
+        "pt-br": "Uruguai",
+        "en-us": "Uruguay"
+    },
+    "competition_team_spa_name": {
+        "pt-br": "Espanha",
+        "en-us": "Spain"
+    },
+    "competition_team_eng_name": {
+        "pt-br": "Inglaterra",
+        "en-us": "England"
+    },
+    "competition_team_jap_name": {
+        "pt-br": "Japão",
+        "en-us": "Japan"
+    },
+    "competition_team_sen_name": {
+        "pt-br": "Senegal",
+        "en-us": "Senegal"
+    },
+    "competition_team_ser_name": {
+        "pt-br": "Sérvia",
+        "en-us": "Serbia"
+    },
+    "competition_team_swi_name": {
+        "pt-br": "Suiça",
+        "en-us": "Switzerland"
+    },
+    "competition_team_mex_name": {
+        "pt-br": "México",
+        "en-us": "Mexico"
+    },
+    "competition_team_sou_name": {
+        "pt-br": "Coréia do Sul",
+        "en-us": "South Korea"
+    },
+    "competition_team_aus_name": {
+        "pt-br": "Austrália",
+        "en-us": "Australia"
+    },
+    "competition_team_den_name": {
+        "pt-br": "Dinamarca",
+        "en-us": "Denmark"
+    },
+    "competition_team_ira_name": {
+        "pt-br": "Irã",
+        "en-us": "Iran"
+    },
+    "competition_team_sau_name": {
+        "pt-br": "Arábia Saudita",
+        "en-us": "Saudi Arabia"
+    },
+    "competition_team_pol_name": {
+        "pt-br": "Polônia",
+        "en-us": "Poland"
+    },
+    "competition_team_ger_name": {
+        "pt-br": "Alemanha",
+        "en-us": "Germany"
+    },
+    "competition_team_arg_name": {
+        "pt-br": "Argentina",
+        "en-us": "Argentina"
+    },
+    "competition_team_por_name": {
+        "pt-br": "Portugal",
+        "en-us": "Portugal"
+    },
+    "competition_team_tun_name": {
+        "pt-br": "Tunísia",
+        "en-us": "Tunisia"
+    },
+    "competition_team_cos_name": {
+        "pt-br": "Costa Rica",
+        "en-us": "Costa Rica"
+    },
+    "competition_team_mor_name": {
+        "pt-br": "Marrocos",
+        "en-us": "Morocco"
+    },
+    "competition_team_wal_name": {
+        "pt-br": "País de Gales",
+        "en-us": "Wales"
+    },
+    "competition_team_net_name": {
+        "pt-br": "Holanda",
+        "en-us": "Netherlands"
+    },
+    "competition_team_gha_name": {
+        "pt-br": "Gana",
+        "en-us": "Ghana"
+    },
+    "competition_team_cam_name": {
+        "pt-br": "Camarões",
+        "en-us": "Cameroon"
+    },
+    "competition_team_qat_name": {
+        "pt-br": "Catar",
+        "en-us": "Qatar"
+    },
+    "competition_team_ecu_name": {
+        "pt-br": "Equador",
+        "en-us": "Ecuador"
+    },
+    "competition_team_usa_name": {
+        "pt-br": "Estados Unidos",
+        "en-us": "USA"
+    },
+    "competition_team_can_name": {
+        "pt-br": "Canadá",
+        "en-us": "Canada"
+    }
+}

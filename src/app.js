@@ -7,7 +7,6 @@ functions.http('bet-football', async (req, res) => {
     try {
         assertHttpMethod(req);
         const data = await createCompetitionUseCase.call(req.body);
-        console.log('finish with success', JSON.stringify(data));
         return res.status(200).contentType('application/json').send(data).end();
     } catch (e) {
         console.error('some error happens on popuplate football-league data', e);
