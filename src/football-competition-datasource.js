@@ -61,7 +61,7 @@ function buildCompetition(
         endAt: new Date(season.end),
         currentRound: 0,
         rounds: roundsResponse.response,
-        teams: teamsList,
+        contenders: teamsList,
         confrontations: confrontations,
         logo: logo,
         fileName: competitionFileName(input.code, logo)
@@ -118,14 +118,18 @@ function _teamsBinaryTree(translations, competitionCode, groupsResponse, teamsRe
  */
 function teamData(translations, competitionCode, apiTeam, apiStanding) {
     const translatedNameProperty = teamName(apiTeam);
-    return {
+    const properties = {
         apiId: apiTeam.id,
         name: translations[translatedNameProperty],
         code: apiTeam.code,
         logo: apiTeam.logo,
-        fileName: teamFileName(competitionCode, apiTeam.logo),
+        fileName: teamFileName(competitionCode, apiTeam.code, apiTeam.logo),
         group: apiStanding.group,
-    }
+    };
+    const team = new Team();
+    Object.assign(team, properties);
+    console.debug('creating team %s', JSON.stringify(team));
+    return team;
 }
 
 /**
@@ -146,7 +150,7 @@ function _footballConfrontation(teamsBinaryTree, match) {
 
     const awayNode = teamsBinaryTree.find({ apiId: match.teams.away.id });
     const away = awayNode.getValue();
-    console.debug('find home team %s in the node with height %d', away.apiId, awayNode.getHeight());
+    console.debug('find away team %s in the node with height %d', away.apiId, awayNode.getHeight());
 
     const round = match.league.round;
     return {
@@ -172,8 +176,8 @@ function competitionFileName(code, logo) {
     return `competition/${code.toLocaleLowerCase()}/logo.${getUrlExtension(logo)}`;
 }
 
-function teamFileName(competitionCode, logo) {
-    return `competition/${competitionCode}/team/logo.${getUrlExtension(logo)}`;
+function teamFileName(competitionCode, teamCode, logo) {
+    return `competition/${competitionCode}/team/${teamCode}.${getUrlExtension(logo)}`;
 }
 
 module.exports = {

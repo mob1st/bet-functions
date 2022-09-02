@@ -8,8 +8,11 @@ const { Duel, MultipleChoice } = require('./contest-entities');
  * @returns {Node} returns the structure of bets for a duel between two teams
  */
 function createDuelNode(teams) {
+    const properties = betsForTeams(teams);
+    const duel = new Duel();
+    Object.assign(duel, properties);
     return {
-        current: betsForTeams(teams),
+        current: duel,
         paths: betsForScores(),
     }
 }
@@ -36,7 +39,7 @@ function betForTeam(team) {
     return {
         odds: {
             type: OddsType.American,
-            value: 0
+            value: 1
         },
         subject: team,
     };
@@ -61,11 +64,16 @@ function betForDraw() {
  */
 function betsForScores() {
     return [
-        { current: scoresForWinner(), paths: [] },
-        { current: scoresForWinner(), paths: [] },
-        { current: scoresForDraw(), paths: [] }
+        { current: propertiesForMultiChoice(scoresForWinner()), paths: [] },
+        { current: propertiesForMultiChoice(scoresForWinner()), paths: [] },
+        { current: propertiesForMultiChoice(scoresForDraw()), paths: [] }
     ]
+}
 
+function propertiesForMultiChoice(properties) {
+    const multiChoice = new MultipleChoice();
+    Object.assign(multiChoice, properties);
+    return multiChoice;
 }
 
 /**

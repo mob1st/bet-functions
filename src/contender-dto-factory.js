@@ -13,7 +13,8 @@ function createDto(contender) {
         case contender instanceof Team:
             return footballDb.contenderDto(contender);
         default:
-            throw ServerError(ErrorCode.INVALID_CONTENDER_TYPE, `invalid competition type for ${typeof contender}`);
+            console.log('invalid object: %s', JSON.stringify(contender));
+            throw new ServerError(ErrorCode.INVALID_CONTENDER_TYPE, `invalid contender type for ${typeof contender}`);
     }
 }
 

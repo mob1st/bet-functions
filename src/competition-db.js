@@ -42,8 +42,8 @@ async function getInput(type, code, season) {
 async function create(input, competition) {
     const competitionRef = firestore.collection(COMPETITION_COLLECTION).doc();
     await createCompetition(input, competitionRef, competition);
-    const contendersTree = await createContenders(input.type, competitionRef, competition);
-    await createConfrontations(input.type, competitionRef, competition, contendersTree);
+    const contendersTree = await createContenders(competitionRef, competition);
+    await createConfrontations(competitionRef, competition, contendersTree);
 }
 
 /**
@@ -59,7 +59,6 @@ function createCompetition(
     return competitionRef.set({
         name: competition.name,
         code: competition.code,
-        logo: competition.log,
         startAt: Timestamp.fromDate(competition.startAt),
         endAt: Timestamp.fromDate(competition.endAt),
         currentRound: competition.currentRound,
@@ -78,9 +77,8 @@ function createCompetition(
  * @param {Competition} competition
  * @param {AvlTree<Object>}
  */
-async function createContenders(inputType, competitionRef, competition) {
+async function createContenders(competitionRef, competition) {
     const batch = firestore.batch();
-    const builder = contestFactory.createDb(inputType);
     const contenders = new AvlTree((a, b) => a.apiId - b.apiId);
     competition.contenders.forEach((contender) => {
         const doc = competitionRef.collection(CONTENDER_COLLECTION).doc();
@@ -133,29 +131,31 @@ function createContestDto(contendersTree, contest) {
         case current instanceof Duel:
             return {
                 current: createDuelDto(contendersTree, contest.current),
-                paths: contest.paths.map((node) => createContestDto(node))
+                paths: contest.paths.map((node) => createContestDto(contendersTree, node))
             };
         case current instanceof MultipleChoice:
             return {
-                current: contest.current,
-                paths: contest.paths.map((node) => createContestDto(node))
+                current: {
+                    contenders: current.contenders
+                },
+                paths: contest.paths.map((node) => createContestDto(contendersTree, node))
             };
         default:
-            throw ServerError(ErrorCode.INVALID_CONTEST_TYPE, `can't persist the contest type ${typeof current}`);
+            throw new ServerError(ErrorCode.INVALID_CONTEST_TYPE, `can't persist the contest type ${typeof current}`);
     }
 }
 
 /**
  * @param {AvlTree} contendersTree
- * @param {Object} contest 
+ * @param {Duel} contest 
  * @returns {Duel} a duel replacing the non-necessary info from contenders 
  */
 function createDuelDto(contendersTree, contest) {
-    const contender1 = contendersTree.find(contest.contender1).getValue();
-    const contender2 = contendersTree.find(contest.contender2).getValue();
+    const contender1 = contendersTree.find(contest.contender1.subject).getValue();
+    const contender2 = contendersTree.find(contest.contender2.subject).getValue();
     return {
-        contender1: contender1,
-        contender2: contender2,
+        contender1: { odds: contest.contender1.odds, subject: contender1 },
+        contender2: { odds: contest.contender2.odds, subject: contender2 },
         draw: contest.draw
     }
 }

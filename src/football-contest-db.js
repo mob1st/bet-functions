@@ -9,6 +9,7 @@ function contenderDto(contender) {
     return {
         code: contender.code,
         name: contender.name,
+        apiId: contender.apiId,
         url: `${PUBLIC_STORAGE_URL}/${contender.fileName}`,
     }
 }
