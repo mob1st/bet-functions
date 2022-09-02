@@ -6,5 +6,6 @@
         "firestore",
         "Snaptshot"
     ],
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
+    "debug.javascript.autoAttachFilter": "onlyWithFlag"
 }

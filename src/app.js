@@ -31,7 +31,7 @@ function assertHttpMethod(req) {
 function handleError(e) {
     let body;
     let statusCode = 500;
-    console.log('handle error');
+    console.error('handling error %s', e);
     switch (true) {
         case e instanceof InvalidHttpMethodError:
             console.log('invalid http error');

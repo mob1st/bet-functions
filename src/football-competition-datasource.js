@@ -42,11 +42,17 @@ function buildCompetition(
     roundsResponse,
 ) {
     const leagueData = leagueResponse.response[0];
-    const { teamsBinaryTree, teamsList } = _teamsBinaryTree(input.code, groupsResponse.response, teamsResponse.response);
+    const { teamsBinaryTree, teamsList } = _teamsBinaryTree(
+        translations,
+        input.code,
+        groupsResponse.response,
+        teamsResponse.response,
+    );
     const confrontations = matchesResponse.response.map(
         (match) => _footballConfrontation(teamsBinaryTree, match)
     );
     const season = leagueData.seasons[0];
+    const logo = leagueData.league.logo;
     return {
         code: input.code,
         season: leagueData.seasons[0].year,
@@ -57,18 +63,20 @@ function buildCompetition(
         rounds: roundsResponse.response,
         teams: teamsList,
         confrontations: confrontations,
-        logo: leagueData.logo,
-        fileName: competitionFileName(input, leagueData.logo)
+        logo: logo,
+        fileName: competitionFileName(input.code, logo)
     }
 }
 
 function competitionTranslation(competitionCode) {
     return new Promise((resolve, reject) => {
         try {
+            console.debug('loading translation files');
             const jsonPath = path.join(__dirname, '..', 'static/translations', `${competitionCode}.json`);
             const jsonString = fs.readFileSync(jsonPath, 'utf-8');
             resolve(JSON.parse(jsonString));
         } catch (e) {
+            console.error('failure to load translation files', e);
             reject(e);
         }
     });
@@ -76,12 +84,13 @@ function competitionTranslation(competitionCode) {
 
 /**
  * Creates a binary tree containing all teams with code and group
+ * @param {Object} translations the translation json object
  * @param {competitionCode} competitionCode the code of the competition
  * @param {Array<Object>} groupsResponse api response containing the groups
  * @param {Array<Object>} teamsResponse tree of teams without group
  * @return {AvlTree<Team>} tree of teams including the group
  */
-function _teamsBinaryTree(competitionCode, groupsResponse, teamsResponse) {
+function _teamsBinaryTree(translations, competitionCode, groupsResponse, teamsResponse) {
     const teamsBinaryTree = new AvlTree((a, b) => a.apiId - b.apiId);
     const standings = groupsResponse[0].league.standings;
     const flatStandings = [].concat.apply([], standings);
@@ -92,7 +101,7 @@ function _teamsBinaryTree(competitionCode, groupsResponse, teamsResponse) {
     console.debug('sortedTeamsWithCode $s', JSON.stringify(sortedTeamsWithCode.map((t) => t.team.id)));
     sortedTeamsWithCode.forEach((teamHolder, index) => {
         const apiTeam = teamHolder.team;
-        const team = teamData(competitionCode, apiTeam, sortedFlatStandings[index]);
+        const team = teamData(translations, competitionCode, apiTeam, sortedFlatStandings[index]);
         listOfTeams.push(team);
         teamsBinaryTree.insert(team);
     });
@@ -107,10 +116,11 @@ function _teamsBinaryTree(competitionCode, groupsResponse, teamsResponse) {
  * @param {Object} apiStanding
  * @returns {Team}
  */
-function teamData(competitionCode, apiTeam, apiStanding) {
+function teamData(translations, competitionCode, apiTeam, apiStanding) {
+    const translatedNameProperty = teamName(apiTeam);
     return {
         apiId: apiTeam.id,
-        name: translations[teamName(apiTeam)],
+        name: translations[translatedNameProperty],
         code: apiTeam.code,
         logo: apiTeam.logo,
         fileName: teamFileName(competitionCode, apiTeam.logo),
@@ -130,13 +140,13 @@ function teamData(competitionCode, apiTeam, apiStanding) {
 function _footballConfrontation(teamsBinaryTree, match) {
     const fixture = match.fixture;
 
-    const homeNode = teamsBinaryTree.find({ apiId: match.teams.home });
+    const homeNode = teamsBinaryTree.find({ apiId: match.teams.home.id });
     const home = homeNode.getValue();
-    console.debug('find home team $s in the node with height $d', home.apiId, homeNode.getHeight());
+    console.debug('find home team %s in the node with height %d', home.apiId, homeNode.getHeight());
 
-    const awayNode = teamsBinaryTree.find({ apiId: match.teams.away });
+    const awayNode = teamsBinaryTree.find({ apiId: match.teams.away.id });
     const away = awayNode.getValue();
-    console.debug('find home team $s in the node with height $d', away.apiId, awayNode.getHeight());
+    console.debug('find home team %s in the node with height %d', away.apiId, awayNode.getHeight());
 
     const round = match.league.round;
     return {

@@ -61,7 +61,6 @@ function shortIsoToDate(strDate) {
  * @returns the extension of the file
  */
 function getUrlExtension(url) {
-    var sss = new Intl();
     return url
         .split(/[#?]/)[0]
         .split('.')
