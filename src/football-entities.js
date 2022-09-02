@@ -21,11 +21,9 @@ class FootballMatch extends Duel {
 
 class Team extends Contender {
     constructor(apiId, code, name, logo, fileName, group) {
-        super(apiId);
+        super(apiId, logo, fileName);
         this.code = code;
         this.name = name;
-        this.logo = logo;
-        this.fileName = fileName;
         this.group = group;
     }
 

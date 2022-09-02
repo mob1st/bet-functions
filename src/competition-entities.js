@@ -123,8 +123,10 @@ class Contender {
     /**     
      * @param {any} apiId id provided by the api used as datasource 
      */
-    constructor(apiId) {
+    constructor(apiId, logo, fileName) {
         this.apiId = apiId;
+        this.logo = logo;
+        this.fileName = fileName;
     }
 }
 

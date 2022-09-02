@@ -18,7 +18,7 @@ const BATCH_WRITE_LIMIT = 500;
  * @param {String} type the type of competition. eg: FOOTBALL 
  * @param {String} code the code that identifies the competition. eg: world_cup
  * @param {Number} season the season of the competition
- * @returns {CompetitionInput}
+ * @returns {CompetitionInput} the input value persisted in the database
  */
 async function getInput(type, code, season) {
     console.info('fetching competition input %s %s %d', type, code, season);
