@@ -1,4 +1,5 @@
-const { Node } = require("./common-data");
+const { Node, getUrlExtension } = require("./common-data");
+const { Contender } = require("./competition-entities");
 const { Duel } = require("./contest-entities");
 const builder = require("./football-match-builder");
 
@@ -18,20 +19,25 @@ class FootballMatch extends Duel {
     }
 }
 
-class Team {
-    constructor(code, name, logo) {
+class Team extends Contender {
+    constructor(apiId, code, name, logo, fileName, group) {
+        super(apiId);
         this.code = code;
-        this.logo = logo;
         this.name = name;
+        this.logo = logo;
+        this.fileName = fileName;
+        this.group = group;
     }
 
     toJSON() {
         return {
             code: this.code,
-            logo: this.code,
-            name: this.name
+            fileName: this.fileName,
+            name: this.name,
         };
     }
+
+
 }
 
 module.exports = {

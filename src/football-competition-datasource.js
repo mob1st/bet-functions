@@ -1,7 +1,8 @@
 const api = require('./rapid-football-api');
 const { CompetitionInput, Competition, Confrontation, ConfrontationStatus } = require('./competition-entities');
-const { FootballMatch } = require('./football-entities');
+const { FootballMatch, Team } = require('./football-entities');
 const { AvlTree } = require('@datastructures-js/binary-search-tree');
+const { getUrlExtension } = require('./common-data');
 const fs = require('fs');
 const path = require('path');
 
@@ -41,9 +42,9 @@ function buildCompetition(
     roundsResponse,
 ) {
     const leagueData = leagueResponse.response[0];
-    const teamsBinaryTree = _teamsBinaryTree(groupsResponse.response, teamsResponse.response);
+    const { teamsBinaryTree, teamsList } = _teamsBinaryTree(input.code, groupsResponse.response, teamsResponse.response);
     const confrontations = matchesResponse.response.map(
-        (match) => _footballConfrontation(translations, teamsBinaryTree, match)
+        (match) => _footballConfrontation(teamsBinaryTree, match)
     );
     const season = leagueData.seasons[0];
     return {
@@ -54,7 +55,10 @@ function buildCompetition(
         endAt: new Date(season.end),
         currentRound: 0,
         rounds: roundsResponse.response,
+        teams: teamsList,
         confrontations: confrontations,
+        logo: leagueData.logo,
+        fileName: competitionFileName(input, leagueData.logo)
     }
 }
 
@@ -72,28 +76,46 @@ function competitionTranslation(competitionCode) {
 
 /**
  * Creates a binary tree containing all teams with code and group
+ * @param {competitionCode} competitionCode the code of the competition
  * @param {Array<Object>} groupsResponse api response containing the groups
  * @param {Array<Object>} teamsResponse tree of teams without group
- * @return {AvlTree<Object>} tree of teams including the group
+ * @return {AvlTree<Team>} tree of teams including the group
  */
-function _teamsBinaryTree(groupsResponse, teamsResponse) {
-    const teamsBinaryTree = new AvlTree((a, b) => a.id - b.id);
+function _teamsBinaryTree(competitionCode, groupsResponse, teamsResponse) {
+    const teamsBinaryTree = new AvlTree((a, b) => a.apiId - b.apiId);
     const standings = groupsResponse[0].league.standings;
     const flatStandings = [].concat.apply([], standings);
     const sortedFlatStandings = flatStandings.sort((a, b) => a.team.id - b.team.id);
     const sortedTeamsWithCode = teamsResponse.sort((a, b) => a.team.id - b.team.id);
+    const listOfTeams = []
     console.debug('sortedFlatStandings $s', JSON.stringify(sortedFlatStandings.map((t) => t.team.id)));
     console.debug('sortedTeamsWithCode $s', JSON.stringify(sortedTeamsWithCode.map((t) => t.team.id)));
     sortedTeamsWithCode.forEach((teamHolder, index) => {
-        const team = teamHolder.team;
-        teamsBinaryTree.insert({
-            id: team.id,
-            code: team.code,
-            logo: team.logo,
-            group: sortedFlatStandings[index].group,
-        });
+        const apiTeam = teamHolder.team;
+        const team = teamData(competitionCode, apiTeam, sortedFlatStandings[index]);
+        listOfTeams.push(team);
+        teamsBinaryTree.insert(team);
     });
-    return teamsBinaryTree;
+    console.debug('tree created with height %d items', teamsBinaryTree.count());
+
+    return { teamsBinaryTree: teamsBinaryTree, teamsList: listOfTeams };
+}
+
+/**
+ * @param {String} competitionCode
+ * @param {Object} apiTeam 
+ * @param {Object} apiStanding
+ * @returns {Team}
+ */
+function teamData(competitionCode, apiTeam, apiStanding) {
+    return {
+        apiId: apiTeam.id,
+        name: translations[teamName(apiTeam)],
+        code: apiTeam.code,
+        logo: apiTeam.logo,
+        fileName: teamFileName(competitionCode, apiTeam.logo),
+        group: apiStanding.group,
+    }
 }
 
 /**
@@ -101,14 +123,21 @@ function _teamsBinaryTree(groupsResponse, teamsResponse) {
  * 
  * Once the match structure from API has home and away teams without the code, used in the logic team Id definition,
  * I need to search in the current teams list 
- * @param {BinarySearchTree<Object>} teamsBinaryTree the binary search structure to find teams by id
+ * @param {AvlTree<Team>} teamsBinaryTree the binary search structure to find teams by id
  * @param {Object} match the match from API
  * @returns {Confrontation} the match structure
  */
-function _footballConfrontation(translations, teamsBinaryTree, match) {
+function _footballConfrontation(teamsBinaryTree, match) {
     const fixture = match.fixture;
-    const home = teamsBinaryTree.find(match.teams.home).getValue();
-    const away = teamsBinaryTree.find(match.teams.away).getValue();
+
+    const homeNode = teamsBinaryTree.find({ apiId: match.teams.home });
+    const home = homeNode.getValue();
+    console.debug('find home team $s in the node with height $d', home.apiId, homeNode.getHeight());
+
+    const awayNode = teamsBinaryTree.find({ apiId: match.teams.away });
+    const away = awayNode.getValue();
+    console.debug('find home team $s in the node with height $d', away.apiId, awayNode.getHeight());
+
     const round = match.league.round;
     return {
         expectedDuration: 90,
@@ -119,14 +148,22 @@ function _footballConfrontation(translations, teamsBinaryTree, match) {
         group: home.group,
         status: ConfrontationStatus.NotStarted,
         contest: FootballMatch.Factory(
-            { code: home.code, logo: home.logo, name: translations[teamName(home)] },
-            { code: away.code, logo: away.logo, name: translations[teamName(away)] }
+            home,
+            away
         ),
     }
 }
 
 function teamName(team) {
     return `competition_team_${team.code.toLowerCase()}_name`;
+}
+
+function competitionFileName(code, logo) {
+    return `competition/${code.toLocaleLowerCase()}/logo.${getUrlExtension(logo)}`;
+}
+
+function teamFileName(competitionCode, logo) {
+    return `competition/${competitionCode}/team/logo.${getUrlExtension(logo)}`;
 }
 
 module.exports = {

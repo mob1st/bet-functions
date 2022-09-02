@@ -1,3 +1,5 @@
+const { Node, getUrlExtension } = require('./common-data');
+
 const CompetitionType = {
     Football: 'FOOTBALL'
 };
@@ -59,11 +61,12 @@ class Competition {
      * @param {Date} endAt when it finishes 
      * @param {Int} currentRound which round is now
      * @param {Array<String>} rounds how many rounds it has until today
-     * @param {Array<Confrontation>} confrontations all confrontations available for this competition
+     * @param {Array<Confrontation>} confrontations all confrontations available for this competition     
+     * @param {Array<Contender>} contenders all teams participating in the competition
      * @param {String} logo the image from the third party API used to download the file
      * @param {Number} season the season of the competition
      */
-    constructor(code, startAt, endAt, currentRound, confrontations, rounds, season) {
+    constructor(code, startAt, endAt, currentRound, confrontations, contenders, rounds, season, logo, fileName) {
         this.code = code;
         this.startAt = startAt;
         this.endAt = endAt;
@@ -71,6 +74,9 @@ class Competition {
         this.confrontations = confrontations;
         this.rounds = rounds;
         this.season = season;
+        this.logo = logo;
+        this.contenders = contenders;
+        this.fileName = fileName;
     }
 }
 
@@ -86,13 +92,13 @@ class Competition {
 class Confrontation {
 
     /**     
-     * @param {Number} apiId id from API
+     * @param {Number} apiId id from API that provided the data to create this confrontation
      * @param {Date} startAt when the confrontation should start
      * @param {Date} allowBetsUntil until when the bets are allowed    
      * @param {String} round the corresponding round for this confrontation
      * @param {String} group the group related to this 
      * @param {Number} expectedDuration how long it should take
-     * @param {Object} contest what can be bet in this competition
+     * @param {Node} contest what can be bet in this competition
      */
     constructor(apiId, startAt, allowBetsUntil, round, expectedDuration, status, contest) {
         this.apiId = apiId;
@@ -105,10 +111,28 @@ class Confrontation {
     }
 }
 
+/**
+ * A contender is an entity that can be a candidate to be selected in a bets.
+ * 
+ * Examples of contenders can be 
+ * - The winner of a duel, like a team or a fighter
+ * - The score of a duel
+ */
+class Contender {
+
+    /**     
+     * @param {any} apiId id provided by the api used as datasource 
+     */
+    constructor(apiId) {
+        this.apiId = apiId;
+    }
+}
+
 module.exports = {
     CompetitionType,
     ConfrontationStatus,
     CompetitionInput,
     Competition,
-    Confrontation
+    Confrontation,
+    Contender
 }

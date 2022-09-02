@@ -7,6 +7,7 @@ class DuelScore {
     /**     
      * @param {ContenderScore} contender1 the scores of the first contender
      * @param {ContenderScore} contender2 the scores of the second contender
+     * @param {draw}
      */
     constructor(contender1, contender2) {
         this.contender1 = contender1;
@@ -28,4 +29,9 @@ class ContenderScore {
         this.contenderId = contenderId;
         this.value = value;
     }
+}
+
+module.exports = {
+    DuelScore,
+    ContenderScore
 }

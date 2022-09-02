@@ -10,7 +10,7 @@ const { Duel, MultipleChoice } = require('./contest-entities');
 function createDuelNode(teams) {
     return {
         current: betsForTeams(teams),
-        next: betsForScores(teams),
+        paths: betsForScores(),
     }
 }
 
@@ -50,79 +50,63 @@ function betForDraw() {
     return {
         odds: {
             type: OddsType.American,
-            value: 0
+            value: 1
         },
+        subject: 'DRAW'
     }
 }
 
 /**
- * 
- * @param {Duo} teams 
  * @returns {Array<Node>}
  */
-function betsForScores(teams) {
+function betsForScores() {
     return [
-        { current: scoresForTeam(teams.first, teams.second), },
-        { current: scoresForTeam(teams.second, teams.first) },
-        { current: scoresForDraw(teams) }
+        { current: scoresForWinner(), paths: [] },
+        { current: scoresForWinner(), paths: [] },
+        { current: scoresForDraw(), paths: [] }
     ]
 
 }
 
 /**
- * 
- * @param {Team} winner
- * @param {Team} loser
  * @returns {MultipleChoice}
  */
-function scoresForTeam(winner, loser) {
+function scoresForWinner() {
     return {
         contenders: [
-            betForScore(
-                { first: winner, second: loser },
-                { first: 1, second: 0 },
-            ),
-            betForScore(
-                { first: winner, second: loser },
-                { first: 2, second: 0 },
-            ),
-            betForScore(
-                { first: winner, second: loser },
-                { first: 2, second: 1 },
-            ),
+            betForScore({ first: 1, second: 0 }),
+            betForScore({ first: 2, second: 0 }),
+            betForScore({ first: 2, second: 1 }),
         ]
     }
 }
 
 /**
  * 
- * @param {Duo} teams 
- * @returns {Array<Bet>}
+ * @returns {MultipleChoice}
  */
-function scoresForDraw(teams) {
-    return [
-        betForScore(teams, { first: 0, second: 0 }),
-        betForScore(teams, { first: 1, second: 1 }),
-        betForScore(teams, { first: 2, second: 2 }),
-    ]
+function scoresForDraw() {
+    return {
+        contenders: [
+            betForScore({ first: 0, second: 0 }),
+            betForScore({ first: 1, second: 1 }),
+            betForScore({ first: 2, second: 2 }),
+        ]
+    }
 }
 
 /**
- * 
- * @param {Duo} teams 
+ *  
  * @param {Duo} scores
  * @returns {Bet}
  */
-function betForScore(teams, scores) {
+function betForScore(scores) {
     return {
         odds: {
             type: OddsType.American,
-            value: 0
+            value: 1
         },
-        subject: {
-            first: scoreForContender(teams.first, scores.first),
-            second: scoreForContender(teams.second, scores.second)
-        }
+        subject: scores
     }
 }
 

@@ -33,11 +33,11 @@ class Node {
     /**
      * 
      * @param {Object} current 
-     * @param {Array<Node>} next 
+     * @param {Array<Node>} paths 
      */
-    constructor(current, next) {
+    constructor(current, paths) {
         this.current = current;
-        this.next = next;
+        this.paths = paths;
     }
 }
 
