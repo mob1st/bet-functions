@@ -1,10 +1,8 @@
 
 const { Competition, CompetitionInput } = require("./competition-entities");
 const { firestore, Timestamp, DocumentReference, PUBLIC_STORAGE_URL } = require("./firebase-setup");
-const { Duel, MultipleChoice } = require('./contest-entities');
-const { Node } = require('./common-data')
+const { Duel } = require('./contest-entities');
 const contenderDtoFactory = require('./contender-dto-factory');
-const { ServerError, ErrorCode } = require("./server-error");
 const { AvlTree } = require("@datastructures-js/binary-search-tree");
 
 const COMPETITION_INPUT_COLLECTION = 'competitionInputs';
@@ -112,37 +110,10 @@ function createConfrontations(competitionRef, competition, contendersTree) {
             round: confrontation.round,
             group: confrontation.group,
             status: confrontation.status,
-            contest: createContestDto(contendersTree, confrontation.contest),
+            contest: createDuelDto(contendersTree, confrontation.contest),
         });
     });
     return Promise.all(batches.map(batch => batch.commit()));
-}
-
-/**
- * 
- * @param {String} inputType 
- * @param {AvlTree} contendersTree
- * @param {Node} contest 
- * @returns {Node}
- */
-function createContestDto(contendersTree, contest) {
-    const current = contest.current;
-    switch (true) {
-        case current instanceof Duel:
-            return {
-                current: createDuelDto(contendersTree, contest.current),
-                paths: contest.paths.map((node) => createContestDto(contendersTree, node))
-            };
-        case current instanceof MultipleChoice:
-            return {
-                current: {
-                    contenders: current.contenders
-                },
-                paths: contest.paths.map((node) => createContestDto(contendersTree, node))
-            };
-        default:
-            throw new ServerError(ErrorCode.INVALID_CONTEST_TYPE, `can't persist the contest type ${typeof current}`);
-    }
 }
 
 /**
@@ -156,7 +127,8 @@ function createDuelDto(contendersTree, contest) {
     return {
         contender1: { odds: contest.contender1.odds, subject: contender1 },
         contender2: { odds: contest.contender2.odds, subject: contender2 },
-        draw: contest.draw
+        draw: contest.draw,
+        scores: contest.scores,
     }
 }
 
