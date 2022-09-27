@@ -9,10 +9,10 @@ class FootballMatch extends Duel {
     /**     
      * @param {Team} home 
      * @param {Team} away 
-     * @returns {Node}
+     * @returns {Duel}
      */
     static Factory(home, away) {
-        return builder.createDuelNode({
+        return builder.createDuel({
             first: home,
             second: away
         });

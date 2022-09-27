@@ -1,5 +1,5 @@
 const api = require('./rapid-football-api');
-const { CompetitionInput, Competition, Confrontation, ConfrontationStatus } = require('./competition-entities');
+const { CompetitionInput, Competition, Confrontation, ConfrontationStatus, ConfrontationType } = require('./competition-entities');
 const { FootballMatch, Team } = require('./football-entities');
 const { AvlTree } = require('@datastructures-js/binary-search-tree');
 const { getUrlExtension } = require('./common-data');
@@ -154,6 +154,7 @@ function _footballConfrontation(teamsBinaryTree, match) {
 
     const round = match.league.round;
     return {
+        type: ConfrontationType.DuelWinner,
         expectedDuration: 90,
         apiId: fixture.id,
         startAt: new Date(fixture.date),

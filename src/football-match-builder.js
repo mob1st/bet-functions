@@ -1,20 +1,17 @@
 const { Duo, Node } = require('./common-data');
 const { OddsType, Bet } = require('./bet-entities');
-const { Duel, MultipleChoice } = require('./contest-entities');
+const { Duel, MultipleChoice, MultipleChoiceType } = require('./contest-entities');
 
 /**
  * Creates a {@link Node} containing a duel and the scores of the duel
  * @param {Duo} teams the teams that will play against each other
  * @returns {Node} returns the structure of bets for a duel between two teams
  */
-function createDuelNode(teams) {
+function createDuel(teams) {
     const properties = betsForTeams(teams);
     const duel = new Duel();
     Object.assign(duel, properties);
-    return {
-        current: duel,
-        paths: betsForScores(),
-    }
+    return duel;
 }
 
 /**
@@ -27,6 +24,7 @@ function betsForTeams(teams) {
         contender1: betForTeam(teams.first),
         contender2: betForTeam(teams.second),
         draw: betForDraw(teams),
+        scores: betsForScores()
     };
 }
 
@@ -64,10 +62,10 @@ function betForDraw() {
  */
 function betsForScores() {
     return [
-        { current: propertiesForMultiChoice(scoresForWinner()), paths: [] },
-        { current: propertiesForMultiChoice(scoresForWinner()), paths: [] },
-        { current: propertiesForMultiChoice(scoresForDraw()), paths: [] }
-    ]
+        propertiesForMultiChoice(scoresForWinner()),
+        propertiesForMultiChoice(scoresForWinner()),
+        propertiesForMultiChoice(scoresForDraw()),
+    ];
 }
 
 function propertiesForMultiChoice(properties) {
@@ -81,6 +79,7 @@ function propertiesForMultiChoice(properties) {
  */
 function scoresForWinner() {
     return {
+        type: MultipleChoiceType.IntScores,
         contenders: [
             betForScore({ first: 1, second: 0 }),
             betForScore({ first: 2, second: 0 }),
@@ -95,6 +94,7 @@ function scoresForWinner() {
  */
 function scoresForDraw() {
     return {
+        type: MultipleChoiceType.IntScores,
         contenders: [
             betForScore({ first: 0, second: 0 }),
             betForScore({ first: 1, second: 1 }),
@@ -131,5 +131,5 @@ function scoreForContender(contender, score) {
 }
 
 module.exports = {
-    createDuelNode
+    createDuel
 }

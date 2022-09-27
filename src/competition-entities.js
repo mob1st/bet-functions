@@ -1,8 +1,10 @@
-const { Node, getUrlExtension } = require('./common-data');
-
 const CompetitionType = {
     Football: 'FOOTBALL'
 };
+
+const ConfrontationType = {
+    DuelWinner: 'DUEL_WINNER'
+}
 
 const ConfrontationStatus = {
     NotStarted: 'NOT_STARTED',
@@ -91,16 +93,18 @@ class Competition {
  */
 class Confrontation {
 
-    /**     
+    /**  
+     * @param    
      * @param {Number} apiId id from API that provided the data to create this confrontation
      * @param {Date} startAt when the confrontation should start
      * @param {Date} allowBetsUntil until when the bets are allowed    
      * @param {String} round the corresponding round for this confrontation
      * @param {String} group the group related to this 
      * @param {Number} expectedDuration how long it should take
-     * @param {Node} contest what can be bet in this competition
+     * @param {Any} contest what can be bet in this competition
      */
     constructor(apiId, startAt, allowBetsUntil, round, expectedDuration, status, contest) {
+        this.type = type;
         this.apiId = apiId;
         this.startAt = startAt;
         this.allowBetsUntil = allowBetsUntil;
