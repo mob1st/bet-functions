@@ -5,19 +5,6 @@ class Duo {
     }
 }
 
-class Node {
-
-    /**
-     * 
-     * @param {Object} current 
-     * @param {Array<Node>} paths 
-     */
-    constructor(current, paths) {
-        this.current = current;
-        this.paths = paths;
-    }
-}
-
 /**
  * Converts the given string date in the format YYYY-mm-dd to a Date instance
  * @param {String} strDate the string date to be formatted 
@@ -47,7 +34,6 @@ function getUrlExtension(url) {
 
 module.exports = {
     Duo,
-    Node,
     shortIsoToDate,
     getUrlExtension
 }
